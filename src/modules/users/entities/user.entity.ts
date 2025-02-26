@@ -5,17 +5,17 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from 'typeorm';
 import { ActivityLevel } from '../../user-profiles/enums/activity-level.enum';
 import { Goal } from '../../user-profiles/enums/goal.enum';
 import { SubscriptionType } from '../enums/subscription-type.enum';
 import { Gender } from '../../user-profiles/enums/gender.enum';
 import { UserProfile } from '../../user-profiles/entities/user-profile.entity';
+import { WaterTracker } from 'src/modules/water-tracker/entities/water-tracker.entity';
 
 @Entity({ name: 'users' })
 export class User {
-
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -28,9 +28,11 @@ export class User {
   @Column({ type: 'varchar', length: 50, nullable: false })
   name: string;
 
-  @OneToOne(() => UserProfile,
-    profile => profile.user)
+  @OneToOne(() => UserProfile, (profile) => profile.user)
   profile: UserProfile;
+
+  // @OneToMany(() => WaterTracker, (waterTracker) => waterTracker.user)
+  // waterTrackers: WaterTracker[];
 
   // @OneToMany(() => BlogPost, post => post.author)
   // blogPosts: BlogPost[]
@@ -38,7 +40,11 @@ export class User {
   // @OneToMany(() => Comment, comment => comment.author)
   // comments: Comment[];
 
-  @Column({ type: 'enum', enum: SubscriptionType, default: SubscriptionType.FREE })
+  @Column({
+    type: 'enum',
+    enum: SubscriptionType,
+    default: SubscriptionType.FREE,
+  })
   subscriptionType: SubscriptionType;
 
   @CreateDateColumn({ type: 'timestamptz' })
@@ -46,5 +52,4 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
-
 }
