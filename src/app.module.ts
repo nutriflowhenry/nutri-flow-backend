@@ -16,7 +16,7 @@ import typeOrmConfig from './config/typeOrm.config';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) =>
-        configService.get('typeorm'),
+         configService.get('typeorm'),
     }),
     UsersModule,
     WaterTrackerModule,
@@ -24,4 +24,5 @@ import typeOrmConfig from './config/typeOrm.config';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+}

@@ -21,6 +21,6 @@ const typeOrmConfig = {
 
 export default registerAs('typeorm', () => typeOrmConfig);
 
-export const connnectionSource = new DataSource(
-  typeOrmConfig as DataSourceOptions,
+export const connectionSource = new DataSource(
+   typeOrmConfig as DataSourceOptions,
 );
