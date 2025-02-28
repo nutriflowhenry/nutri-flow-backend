@@ -19,7 +19,7 @@ export class WaterTracker {
   @CreateDateColumn({ type: 'date' })
   date: string;
 
-  // @ManyToOne(() => User, (user) => user.waterTrackers, { onDelete: 'CASCADE' })
-  // @JoinColumn({ name: 'user_id' })
-  // user: User;
+  @ManyToOne(() => User, (user) => user.waterTrackers, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }
