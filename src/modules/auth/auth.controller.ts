@@ -19,5 +19,4 @@ export class AuthController {
    login(@Body() credentials: LoginUserDto) {
       return this.authService.logIn(credentials);
    }
-
 }

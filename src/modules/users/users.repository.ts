@@ -16,4 +16,8 @@ export class UsersRepository {
    createUser(userData: Omit<CreateUserDto, 'passwordConfirmation'>): Promise<User> {
       return this.repository.save(userData);
    }
+
+   async findAll(): Promise<User[]> {
+      return this.repository.find();
+   }
 }
