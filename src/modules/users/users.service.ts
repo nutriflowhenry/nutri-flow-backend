@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from "./users.repository";
+import { plainToInstance } from 'class-transformer';
+import { PublicUserDto } from './dto/public-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -12,8 +14,9 @@ export class UsersService {
       return 'This action adds a new user';
    }
 
-   findAll() {
-      return `This action returns all users`;
+   async findAll(): Promise<PublicUserDto[]> {
+      const users = await this.usersRepository.findAll();
+      return plainToInstance(PublicUserDto, users)
    }
 
    findOne(id: number) {
