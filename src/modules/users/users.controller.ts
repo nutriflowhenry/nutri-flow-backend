@@ -6,7 +6,6 @@ import { Roles } from '../../decorators/roles.decorator';
 import { Role } from '../auth/enums/roles.enum';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { User } from './entities/user.entity';
 import { PublicUserDto } from './dto/public-user.dto';
 
 @Controller('users')

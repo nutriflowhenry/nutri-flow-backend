@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from "./users.repository";
-import { User } from './entities/user.entity';
 import { plainToInstance } from 'class-transformer';
 import { PublicUserDto } from './dto/public-user.dto';
 
