@@ -13,11 +13,11 @@ export class WaterTracker {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 })
   amount: number;
 
-  @CreateDateColumn({ type: 'timestamptz' })
-  date: Date;
+  @CreateDateColumn({ type: 'date' })
+  date: string;
 
   // @ManyToOne(() => User, (user) => user.waterTrackers, { onDelete: 'CASCADE' })
   // @JoinColumn({ name: 'user_id' })

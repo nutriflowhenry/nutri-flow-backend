@@ -1,15 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { WaterTrackerService } from './water-tracker.service';
-import { CreateWaterTrackerDto } from './dto/create-water-tracker.dto';
 import { UpdateWaterTrackerDto } from './dto/update-water-tracker.dto';
 import { GetWaterTrackerDto } from './dto/get-water-tracker.dto';
 
@@ -17,33 +7,16 @@ import { GetWaterTrackerDto } from './dto/get-water-tracker.dto';
 export class WaterTrackerController {
   constructor(private readonly waterTrackerService: WaterTrackerService) {}
 
-  @Post('create')
-  create(@Body() createWaterTrackerDto: CreateWaterTrackerDto) {
-    // const userId: string = createWaterTrackerDto.user;
-    return this.waterTrackerService.create(createWaterTrackerDto);
+  @Post('update')
+  async updateDailyWaterTracker(@Body() updateDto: UpdateWaterTrackerDto) {
+    // Por el momento no se relaciona con un usuario
+    // const user = req['user'];
+    return this.waterTrackerService.updateDailyWaterTracker(updateDto);
   }
-
-  @Get('total')
-  getTotalWaterConsumptionPerDay(@Query() queryData: GetWaterTrackerDto) {
-    let dayDate: Date;
-    const day = queryData.date;
-    if (!day) {
-      dayDate = new Date();
-    } else {
-      dayDate = new Date(day);
-    }
-    return this.waterTrackerService.getTotalWaterConsumptionPerDay(dayDate);
-  }
-
-  @Get('all')
-  getWaterConsumptionPerDay(@Query() queryData: GetWaterTrackerDto) {
-    let dayDate: Date;
-    const day = queryData.date;
-    if (!day) {
-      dayDate = new Date();
-    } else {
-      dayDate = new Date(day);
-    }
-    return this.waterTrackerService.getWaterConsumptionPerDay(dayDate);
+  @Get('daily')
+  async getDailyWaterTracker(@Query() queryData: GetWaterTrackerDto) {
+    // Por el momento no se relaciona con usuario
+    const day: string = queryData.date;
+    return this.waterTrackerService.getDailyWaterTracker(day);
   }
 }
