@@ -1,3 +1,4 @@
+import { UserProfile } from 'src/modules/user-profiles/entities/user-profile.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   Column,
@@ -19,7 +20,9 @@ export class WaterTracker {
   @CreateDateColumn({ type: 'date' })
   date: string;
 
-  @ManyToOne(() => User, (user) => user.waterTrackers, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserProfile, (userProfile) => userProfile.waterTrackers, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  userProfile: UserProfile;
 }
