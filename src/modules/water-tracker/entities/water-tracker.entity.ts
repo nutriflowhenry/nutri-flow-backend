@@ -17,12 +17,12 @@ export class WaterTracker {
   @Column({ type: 'int', default: 0 })
   amount: number;
 
-  @CreateDateColumn({ type: 'date' })
-  date: string;
+  @CreateDateColumn({ type: 'timestamptz' })
+  date: Date;
 
   @ManyToOne(() => UserProfile, (userProfile) => userProfile.waterTrackers, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'user_profile_id' })
   userProfile: UserProfile;
 }
