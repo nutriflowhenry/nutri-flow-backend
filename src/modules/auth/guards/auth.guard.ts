@@ -1,13 +1,27 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
+import * as jwksClient from 'jwks-rsa';
+import { promisify } from 'util';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+   private jwksClient = jwksClient({
+      jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
+   });
+
+   // private auth0JwksClient = jwksClient({
+   //    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
+   // });
+   //
+   // private googleJwksClient = jwksClient({
+   //    jwksUri: 'https://www.googleapis.com/oauth2/v3/certs',
+   // });
+
    constructor(private readonly jwtService: JwtService) {
    }
 
-   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+   async canActivate(context: ExecutionContext): Promise<boolean> {
       const request = context.switchToHttp().getRequest();
       const authHeader = request.headers['authorization'];
 
@@ -17,20 +31,40 @@ export class AuthGuard implements CanActivate {
 
       const token = authHeader.split(' ')[1];
 
+      const decodedToken = this.jwtService.decode(token, { complete: true }) as {
+         header?: { kid?: string };
+         payload?: { iss?: string }
+      };
+
+      if (!decodedToken?.payload?.iss) {
+         throw new UnauthorizedException('Invalid token: missing issuer');
+      }
+
       try {
-         const secret = process.env.JWT_SECRET;
-         const tokenPayload = this.jwtService.verify(token, { secret });
+         let secretOrPublicKey: string;
 
-         tokenPayload.iat = new Date(tokenPayload.iat * 1000).toLocaleString('es');
-         tokenPayload.exp = new Date(tokenPayload.exp * 1000).toLocaleString('es');
+         if (decodedToken.payload.iss.includes('auth0.com')) {
+            const getKey = promisify(this.jwksClient.getSigningKey);
+            const key = await getKey(decodedToken.header.kid);
+            secretOrPublicKey = key.getPublicKey();
 
-         console.log({ tokenPayload });
+         } else {
+            secretOrPublicKey = process.env.JWT_SECRET_KEY;
+         }
+
+         const tokenPayload = this.jwtService.verify(token, { secret: secretOrPublicKey });
+
+         console.log({
+            tokenPayload,
+            issuedAt: new Date(tokenPayload.iat * 1000).toLocaleString(),
+            expiresAt: new Date(tokenPayload.exp * 1000).toLocaleString(),
+         });
+
          request.user = tokenPayload;
-
-         return true
+         return true;
 
       } catch (error) {
-         throw new UnauthorizedException('Invalid token');
+         throw new UnauthorizedException(`Invalid token: ${error.message}`);
       }
    }
 }
