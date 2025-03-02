@@ -1,4 +1,5 @@
 import { IsDateString, IsInt, IsNotEmpty, IsPositive } from 'class-validator';
+import { UserProfile } from 'src/modules/user-profiles/entities/user-profile.entity';
 
 export class CreateWaterTrackerDto {
   @IsNotEmpty({ message: 'Se necesita una cantidad de agua consumida' })
@@ -12,4 +13,6 @@ export class CreateWaterTrackerDto {
     { message: 'El parámetro "date" debe tener el formato ISO (YYYY-MM-DD).' },
   )
   date: string;
+
+  userProfile: UserProfile;
 }

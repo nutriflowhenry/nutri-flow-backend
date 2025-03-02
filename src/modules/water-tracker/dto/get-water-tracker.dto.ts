@@ -1,10 +1,22 @@
-import { IsDateString, IsOptional } from 'class-validator';
+import {
+  IsDateString,
+  IsISO8601,
+  IsOptional,
+  IsTimeZone,
+} from 'class-validator';
 
 export class GetWaterTrackerDto {
-  @IsOptional()
-  @IsDateString(
+  @IsISO8601(
     {},
-    { message: 'El parámetro "date" debe tener el formato ISO (YYYY-MM-DD).' },
+    {
+      message:
+        'El query param "\date\" debe tener como valor una feche con formato: YYYY-MM-DDTHH:mm:ss.sssZ',
+    },
   )
-  date: string;
+  @IsOptional()
+  date?: string;
+
+  @IsOptional()
+  @IsTimeZone()
+  timeZone?: string;
 }
