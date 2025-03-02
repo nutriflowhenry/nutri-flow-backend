@@ -1,4 +1,4 @@
-import { IsISO8601, IsOptional } from 'class-validator';
+import { IsISO8601, IsOptional, IsTimeZone } from 'class-validator';
 
 export class GetFoodTrackerDto {
   // Con string tipo YYYY-MM-DD
@@ -17,6 +17,9 @@ export class GetFoodTrackerDto {
     },
   )
   @IsOptional()
-  // @Type(() => Date)
   date?: string;
+
+  @IsOptional()
+  @IsTimeZone()
+  timeZone?: string;
 }

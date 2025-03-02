@@ -43,9 +43,10 @@ export class FoodTrackerController {
     @Query() queryDate: GetFoodTrackerDto,
     @Req() req: { user: { sub: string } },
   ) {
+    console.log('ho');
     return await this.foodTrackerService.getDailyCalories(
-      queryDate.date,
       req.user.sub,
+      queryDate?.date,
     );
   }
 

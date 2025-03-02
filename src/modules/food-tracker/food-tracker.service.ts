@@ -43,10 +43,11 @@ export class FoodTrackerService {
 
   async getDailyCalories(userId: string, date?: string) {
     const validateUserProfile: UserProfile = await this.getUserProfile(userId);
+    const today: string = date || new Date().toISOString();
     const dailyFoodTracker: FoodTracker[] =
       await this.foodTrackerRepository.getDailyFooodTracker(
         validateUserProfile,
-        date,
+        today,
       );
     const caloriesConsumed: number = dailyFoodTracker.reduce(
       (sum, food) => sum + food.calories,
@@ -59,12 +60,12 @@ export class FoodTrackerService {
   }
 
   async getDailyFoodTracker(userId: string, date?: string) {
-    console.log(date);
+    const today: string = date || new Date().toISOString();
     const validateUserProfile: UserProfile = await this.getUserProfile(userId);
     const dailyFoodTracker: FoodTracker[] =
       await this.foodTrackerRepository.getDailyFooodTracker(
         validateUserProfile,
-        date,
+        today,
       );
     return {
       message: `Registro totales de comida para el día ${date}`,
@@ -73,13 +74,15 @@ export class FoodTrackerService {
   }
 
   async getUserProfile(userId: string): Promise<UserProfile> {
-    console.log(userId);
     const user: User | null = await this.userService.findById(userId);
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
+    if (!user.profile) {
+      throw new NotFoundException('El usuario no tiene perfil asociado');
+    }
     const userProfile: UserProfile = await this.usersProfileServise.findOneById(
-      user.profile?.id,
+      user.profile.id,
     );
     if (!userProfile) {
       throw new NotFoundException('Perfil no encontrado');
