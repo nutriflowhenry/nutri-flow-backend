@@ -1,7 +1,7 @@
 import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString, IsStrongPassword, Length, MaxLength } from 'class-validator';
 import { Match } from '../../../decorators/match.decorator';
 
-export class CreateUserDto {
+export class CreateLocalUserDto {
    @IsNotEmpty()
    @IsString()
    @MaxLength(30)
