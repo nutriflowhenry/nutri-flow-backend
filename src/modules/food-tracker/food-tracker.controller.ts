@@ -43,9 +43,10 @@ export class FoodTrackerController {
     @Query() queryDate: GetFoodTrackerDto,
     @Req() req: { user: { sub: string } },
   ) {
+    console.log('ho');
     return await this.foodTrackerService.getDailyCalories(
-      queryDate.date,
       req.user.sub,
+      queryDate?.date,
     );
   }
 
@@ -62,7 +63,7 @@ export class FoodTrackerController {
   }
 
   @UseGuards(AuthGuard)
-  @Delete('delete:id')
+  @Delete('delete/:id')
   async deleteFoodTracker(
     @Param('id', ParseUUIDPipe) foodTrackerId: string,
     @Req() req: { user: { sub: string } },
@@ -73,7 +74,8 @@ export class FoodTrackerController {
     );
   }
 
-  @Patch('update:id')
+  @UseGuards(AuthGuard)
+  @Patch('update/:id')
   async updateFoodTracker(
     @Param('id', ParseUUIDPipe) foodTrackerId: string,
     @Body() updateFoodTrackerData: UpdateFoodTrackerDto,

@@ -32,6 +32,6 @@ export class FoodTracker {
   @ManyToOne(() => UserProfile, (userProfile) => userProfile.foodTrackers, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'user_profile_id' })
   userProfile: UserProfile;
 }

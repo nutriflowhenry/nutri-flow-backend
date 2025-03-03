@@ -24,7 +24,10 @@ export class UsersRepository {
    }
 
    async findById(id: string): Promise<User> {
-      return this.repository.findOneBy({ id });
+      return this.repository.findOne({
+         where: { id },
+         relations: ['profile'],
+      });
    }
 
    async findByAuthId(auth0Id: string): Promise<User> {
