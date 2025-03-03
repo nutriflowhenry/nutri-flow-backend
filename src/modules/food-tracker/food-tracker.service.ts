@@ -91,12 +91,27 @@ export class FoodTrackerService {
     }
   }
 
+  async getAllFoodTrackerByUser(
+    userProfile: UserProfile,
+  ): Promise<FoodTracker[]> {
+    const allFoodTracker: FoodTracker[] | [] =
+      await this.foodTrackerRepository.getAllFoodTrackerByUser(userProfile);
+    if (!allFoodTracker) {
+      throw new ForbiddenException(
+        'No tienes permiso para eliminar o modificar este registro o no existe',
+      );
+    }
+    return allFoodTracker;
+  }
+
   async validateUpadateDelete(
     userId: string,
     foodTrackerId: string,
   ): Promise<FoodTracker> {
     const validUserProfile: UserProfile = await this.getUserProfile(userId);
-    const foodTracker: FoodTracker = validUserProfile.foodTrackers.find(
+    const allFoodTracker: FoodTracker[] =
+      await this.getAllFoodTrackerByUser(validUserProfile);
+    const foodTracker: FoodTracker = allFoodTracker.find(
       (foodTracker) => foodTracker.id === foodTrackerId,
     );
     if (!foodTracker) {
@@ -108,20 +123,21 @@ export class FoodTrackerService {
     }
   }
 
-  async deleteFoodTracker(userId: string, foodTrackerId: string) {
+  async deleteFoodTracker(foodTrackerId: string, userId: string) {
     const validateFoodTracker: FoodTracker = await this.validateUpadateDelete(
       userId,
       foodTrackerId,
     );
+    const deletedId: string = validateFoodTracker.id;
     await this.foodTrackerRepository.delete(validateFoodTracker);
     return {
-      message: `El registro de foodTracker con id ${validateFoodTracker.id} fue borrado exitosamente`,
+      message: `El registro de foodTracker con id ${deletedId} fue borrado exitosamente`,
     };
   }
 
   async updateFoodTracker(
-    userId: string,
     foodTrackerId: string,
+    userId: string,
     updateFoodTrackerData: UpdateFoodTrackerDto,
   ) {
     const validateFoodTracker: FoodTracker = await this.validateUpadateDelete(

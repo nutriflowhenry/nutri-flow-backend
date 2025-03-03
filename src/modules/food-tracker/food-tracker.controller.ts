@@ -63,7 +63,7 @@ export class FoodTrackerController {
   }
 
   @UseGuards(AuthGuard)
-  @Delete('delete:id')
+  @Delete('delete/:id')
   async deleteFoodTracker(
     @Param('id', ParseUUIDPipe) foodTrackerId: string,
     @Req() req: { user: { sub: string } },
@@ -74,7 +74,8 @@ export class FoodTrackerController {
     );
   }
 
-  @Patch('update:id')
+  @UseGuards(AuthGuard)
+  @Patch('update/:id')
   async updateFoodTracker(
     @Param('id', ParseUUIDPipe) foodTrackerId: string,
     @Body() updateFoodTrackerData: UpdateFoodTrackerDto,
