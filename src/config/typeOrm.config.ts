@@ -6,11 +6,11 @@ dotenvConfig({ path: '.env' });
 
 const typeOrmConfig = {
    type: 'postgres',
-   host: 'localhost',
-   port: parseInt('5432', 10),
-   username: 'postgres',
-   password: '1234',
-   database: 'nutriflow',
+   host: process.env.DB_HOST,
+   port: parseInt(process.env.DB_PORT, 10),
+   username: process.env.DB_USERNAME,
+   password: process.env.DB_PASSWORD,
+   database: process.env.DB_NAME,
    entities: ['dist/**/*.entity{.ts,.js}'],
    autoLoadEntities: true,
    dropSchema: false,
