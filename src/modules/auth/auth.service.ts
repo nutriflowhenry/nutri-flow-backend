@@ -8,6 +8,7 @@ import { PublicUserDto } from '../users/dto/public-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { User } from '../users/entities/user.entity';
 import { CreateAuth0UserDto } from '../users/dto/create-auth0-user.dto';
+import axios from 'axios';
 
 @Injectable()
 export class AuthService {
@@ -66,9 +67,41 @@ export class AuthService {
          role: user.role,
       };
 
+      console.log({ payload });
+
       return {
          user,
          access_token: this.jwtService.sign(payload)
       };
+   }
+
+   async exchangeCodeForToken(code: any) {
+      console.log('Request body:', {
+         grant_type: 'authorization_code',
+         client_id: process.env.AUTH0_CLIENT_ID,
+         client_secret: process.env.AUTH0_CLIENT_SECRET,
+         redirect_uri: process.env.AUTH0_CALLBACK_URL,
+         code,
+      });
+
+      const response = await axios.post(`https://${process.env.AUTH0_DOMAIN}/oauth/token`, {
+         grant_type: 'authorization_code',
+         client_id: process.env.AUTH0_CLIENT_ID,
+         client_secret: process.env.AUTH0_CLIENT_SECRET,
+         redirect_uri: process.env.AUTH0_CALLBACK_URL,
+         code
+      });
+
+      console.log(response.data);
+      return response.data; // { access_token, id_token, ... }
+   }
+
+   async fetchUserProfile(accessToken: any) {
+      const response = await axios.get(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
+         headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      console.log(response.data);
+      return response.data; // { sub, email, name, ... }
    }
 }
