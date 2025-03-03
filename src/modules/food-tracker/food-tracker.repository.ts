@@ -72,6 +72,16 @@ export class FoodTrackerRepository {
     });
   }
 
+  async getAllFoodTrackerByUser(
+    userProfile: UserProfile,
+  ): Promise<FoodTracker[] | []> {
+    return this.foodTrackerRepository.find({
+      where: {
+        userProfile,
+      },
+    });
+  }
+
   async delete(foodTracker: FoodTracker): Promise<void> {
     await this.foodTrackerRepository.remove(foodTracker);
   }
