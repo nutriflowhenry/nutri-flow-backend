@@ -50,8 +50,7 @@ export class AuthService {
       const token = this.jwtService.sign(userPayload);
 
       return {
-         message: `El usuario ${user.id} ha iniciado sesión`,
-         role: userPayload.role,
+         id: userPayload.sub,
          token,
       };
    }
@@ -70,8 +69,8 @@ export class AuthService {
       console.log({ payload });
 
       return {
-         user,
-         access_token: this.jwtService.sign(payload)
+         id: payload.sub,
+         token: this.jwtService.sign(payload)
       };
    }
 
