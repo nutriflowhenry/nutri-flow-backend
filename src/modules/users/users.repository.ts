@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { DeleteResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateLocalUserDto } from './dto/create-local-user.dto';
 import { CreateAuth0UserDto } from './dto/create-auth0-user.dto';

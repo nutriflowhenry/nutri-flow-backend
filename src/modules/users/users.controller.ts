@@ -1,24 +1,21 @@
 import {
    Controller,
    Get,
-   Post,
    Body,
-   Patch,
-   Param,
    Delete,
    HttpCode,
    HttpStatus,
    UseGuards,
-   ParseUUIDPipe, Req, Put
+   Req, Put
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateLocalUserDto } from './dto/create-local-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from '../../decorators/roles.decorator';
 import { Role } from '../auth/enums/roles.enum';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { PublicUserDto } from './dto/public-user.dto';
+import { User } from './entities/user.entity';
 
 @Controller('users')
 export class UsersController {
@@ -43,32 +40,30 @@ export class UsersController {
    @Get(':id')
    @HttpCode(HttpStatus.OK)
    @UseGuards(AuthGuard)
-   findOne(@Param('id', ParseUUIDPipe) id: string,
-           @Req() request: Request & { user: any }
-   ) {
+   findOne(
+      @Req() request: Request & { user: any }): Promise<PublicUserDto> {
       const requesterId = request.user.sub;
-      return this.usersService.findOne(id, requesterId);
+      return this.usersService.findOne(requesterId);
    }
 
 
    @Put(':id')
    @HttpCode(HttpStatus.OK)
    @UseGuards(AuthGuard)
-   update(@Param('id', ParseUUIDPipe) id: string,
-          @Req() request: Request & { user: any },
-          @Body() updateData: UpdateUserDto
-   ) {
+   update(
+      @Req() request: Request & { user: any },
+      @Body() updateData: UpdateUserDto): Promise<User> {
       const requesterId = request.user.sub;
-      return this.usersService.update(id, requesterId, updateData);
+      return this.usersService.update(requesterId, updateData);
    }
 
 
    @Delete(':id')
    @HttpCode(HttpStatus.NO_CONTENT)
    @UseGuards(AuthGuard)
-   remove(@Param('id', ParseUUIDPipe) id: string,
-          @Req() request: Request & { user: any }) {
+   remove(
+      @Req() request: Request & { user: any }): Promise<void> {
       const requesterId = request.user.sub;
-      return this.usersService.remove(id, requesterId);
+      return this.usersService.remove(requesterId);
    }
 }
