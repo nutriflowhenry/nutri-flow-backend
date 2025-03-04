@@ -27,24 +27,15 @@ export class UsersService {
    }
 
 
-   async findOne(id: string, requesterId: string): Promise<PublicUserDto> {
-      if (id !== requesterId) {
-         throw new ForbiddenException('You are not authorized to access this account');
-      }
-
+   async findOne(id: string): Promise<PublicUserDto> {
       const user = await this.usersRepository.findById(id);
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-
-
+      
       return plainToInstance(PublicUserDto, user);
    }
 
 
-   async update(id: string, requesterId: string, updateData: UpdateUserDto): Promise<User> {
-      if (id !== requesterId) {
-         throw new ForbiddenException(`You are not authorized to update this account`);
-      }
-
+   async update(id: string, updateData: UpdateUserDto): Promise<User> {
       const user = await this.usersRepository.findById(id);
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
@@ -52,11 +43,7 @@ export class UsersService {
    }
 
 
-   async remove(id: string, requesterId: string): Promise<void> {
-      if (id !== requesterId) {
-         throw new ForbiddenException(`You are not authorized to delete this account`);
-      }
-
+   async remove(id: string): Promise<void> {
       const user = await this.usersRepository.findById(id);
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
