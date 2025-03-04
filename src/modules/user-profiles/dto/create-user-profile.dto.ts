@@ -4,12 +4,18 @@ import {
   IsDecimal,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
+  IsUUID,
   Max,
   Min,
 } from 'class-validator';
 import { Gender } from '../enums/gender.enum';
 
 export class CreateUserProfileDto {
+  @IsNotEmpty()
+  @IsUUID()
+  user: string;
+
   @IsNotEmpty()
   @IsDate()
   @Type(() => Date)
@@ -20,14 +26,14 @@ export class CreateUserProfileDto {
   gender: Gender;
 
   @IsNotEmpty()
-  @IsDecimal()
-  @Min(0.01)
-  @Max(250)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(10.0)
+  @Max(299.99)
   weight: number;
 
   @IsNotEmpty()
-  @IsDecimal()
-  @Min(0.01)
-  @Max(3)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0.5)
+  @Max(2.99)
   height: number;
 }

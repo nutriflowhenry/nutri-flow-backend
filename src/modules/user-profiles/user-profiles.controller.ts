@@ -17,8 +17,7 @@ export class UserProfilesController {
 
   @Post()
   create(@Body() createUserProfileDto: CreateUserProfileDto) {
-    const userId: string = '0dsfds';
-    return this.userProfilesService.create(createUserProfileDto, userId);
+    return this.userProfilesService.create(createUserProfileDto);
   }
 
   // @Get()

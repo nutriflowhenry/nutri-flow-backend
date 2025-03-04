@@ -18,21 +18,24 @@ export class UserProfilesService {
     private readonly usersProfileRepository: UsersProfileRepository,
   ) {}
 
-  async create(createUserProfileDto: CreateUserProfileDto, userId: string) {
-    const user: User | null = await this.usersService.findById(userId);
-    if (!user) {
+  async create(createUserProfileDto: CreateUserProfileDto) {
+    const userId: string = createUserProfileDto.user;
+    const userfound: User | null = await this.usersService.findById(userId);
+    if (!userfound) {
       throw new NotFoundException('Usuario no encontrado');
     }
-    if (user.userProfile) {
+    if (userfound.userProfile) {
       throw new ConflictException('El usuario ya tiene un perfil creado');
     }
     const newProfile: UserProfile = await this.usersProfileRepository.create(
       createUserProfileDto,
-      user,
+      userfound,
     );
+
+    const { user, ...sanitizedNewProfile } = newProfile;
     return {
       message: `Perfil de usuario creado exitosamente para el usuario ${userId}`,
-      userProfileCreated: newProfile,
+      userProfileCreated: sanitizedNewProfile,
     };
   }
 
