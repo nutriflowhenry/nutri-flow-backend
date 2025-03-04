@@ -1,7 +1,7 @@
 import {
    Column,
    CreateDateColumn,
-   Entity,
+   Entity, JoinColumn,
    OneToOne,
    PrimaryGeneratedColumn,
    UpdateDateColumn,
@@ -36,7 +36,8 @@ export class User {
    provider: AuthProvider;
 
    @OneToOne(() => UserProfile, (profile) => profile.user)
-   profile: UserProfile;
+   @JoinColumn({ name: 'userProfileId' })
+   userProfile: UserProfile;
 
    // @OneToMany(() => BlogPost, post => post.author)
    // blogPosts: BlogPost[]
