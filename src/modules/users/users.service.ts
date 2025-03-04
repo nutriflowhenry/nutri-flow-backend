@@ -1,5 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateLocalUserDto } from './dto/create-local-user.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './users.repository';
 import { plainToInstance } from 'class-transformer';
@@ -30,7 +29,7 @@ export class UsersService {
    async findOne(id: string): Promise<PublicUserDto> {
       const user = await this.usersRepository.findById(id);
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-      
+
       return plainToInstance(PublicUserDto, user);
    }
 

@@ -65,7 +65,7 @@ export class AuthService {
       let user = await this.usersRepository.findByEmail(googleUser.email);
       if (!user) {
          user = await this.usersRepository.createAuth0User({
-            name: googleUser.name,
+            name: googleUser.given_name,
             email: googleUser.email,
             auth0Id: googleUser.sub
          });
