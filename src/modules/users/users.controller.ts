@@ -9,7 +9,6 @@ import {
    Req, Put
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateLocalUserDto } from './dto/create-local-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from '../../decorators/roles.decorator';
 import { Role } from '../auth/enums/roles.enum';
