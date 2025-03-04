@@ -1,15 +1,12 @@
 import {
    Controller,
    Get,
-   Post,
    Body,
-   Patch,
-   Param,
    Delete,
    HttpCode,
    HttpStatus,
    UseGuards,
-   ParseUUIDPipe, Req, Put
+   Req, Put
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateLocalUserDto } from './dto/create-local-user.dto';
