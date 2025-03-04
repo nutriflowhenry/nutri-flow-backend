@@ -1,12 +1,9 @@
 import {
-   BadRequestException,
    Body,
    Controller,
-   Get,
    HttpCode,
    HttpStatus,
    Post,
-   Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateLocalUserDto } from '../users/dto/create-local-user.dto';
