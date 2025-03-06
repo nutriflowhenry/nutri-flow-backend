@@ -61,29 +61,27 @@ export class UsersController {
    @UseGuards(AuthGuard)
    update(
       @Req() request: Request & { user: any },
-      @Body() updateData: UpdateUserDto): Promise<User> {
+      @Body() updateData: UpdateUserDto): Promise<PublicUserDto> {
       const requesterId = request.user.sub;
       return this.usersService.update(requesterId, updateData);
-   }
-
-
-   @Patch(':id/is-active')
-   @HttpCode(HttpStatus.OK)
-   @UseGuards(AuthGuard, RolesGuard)
-   @Roles(Role.ADMIN)
-   updateIsActive(
-      @Param('id') id: string,
-      @Body('isActive') isActive: boolean): Promise<User> {
-      return this.usersService.update(id, { isActive });
    }
 
 
    @Delete('me')
    @HttpCode(HttpStatus.NO_CONTENT)
    @UseGuards(AuthGuard)
-   remove(
+   deactivateAccount(
       @Req() request: Request & { user: any }): Promise<void> {
       const requesterId = request.user.sub;
-      return this.usersService.remove(requesterId);
+      return this.usersService.deactivateAccount(requesterId);
+   }
+
+
+   @Patch(':id/ban')
+   @HttpCode(HttpStatus.NO_CONTENT)
+   @UseGuards(AuthGuard, RolesGuard)
+   @Roles(Role.ADMIN)
+   banUser(@Param('id') id: string): Promise<void> {
+      return this.usersService.banUser(id);
    }
 }
