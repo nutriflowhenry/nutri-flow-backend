@@ -11,20 +11,22 @@ export class RolesGuard implements CanActivate {
    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
       const requiredRoles = this.reflector.getAllAndOverride<Role[]>(
          'roles', [context.getHandler(), context.getClass()]
-      )
+      );
 
-      console.log(`required roles: ${requiredRoles}`);
+      console.log(`Required role: ${requiredRoles}`);
 
       const request = context.switchToHttp().getRequest();
       const user = request.user;
 
-      console.log(`user role: ${user.role}`);
+      console.log(`User role: ${user.role}`);
 
       const hasRole = requiredRoles.includes(user?.role);
       if (!hasRole) {
+         console.log('Not authorized');
          throw new ForbiddenException('You are not authorized to perform this action');
       }
 
-      return true
+      console.log('Authorized');
+      return true;
    }
 }

@@ -6,23 +6,26 @@ import { PublicUserDto } from '../users/dto/public-user.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+   constructor(private readonly authService: AuthService) {
+   }
 
-  @Post('signup')
-  @HttpCode(HttpStatus.CREATED)
-  signUp(@Body() userData: CreateLocalUserDto): Promise<PublicUserDto> {
-    console.log(userData);
-    return this.authService.signUp(userData);
-  }
+   @Post('signup')
+   @HttpCode(HttpStatus.CREATED)
+   signUp(@Body() userData: CreateLocalUserDto): Promise<PublicUserDto> {
+      console.log(userData);
+      return this.authService.signUp(userData);
+   }
 
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  login(@Body() credentials: LoginUserDto) {
-    return this.authService.logIn(credentials);
-  }
 
-  @Post('google')
-  googleAuth(@Body('token') token: string) {
-    return this.authService.authenticateWithGoogle(token);
-  }
+   @Post('login')
+   @HttpCode(HttpStatus.OK)
+   login(@Body() credentials: LoginUserDto) {
+      return this.authService.logIn(credentials);
+   }
+
+
+   @Post('google')
+   googleAuth(@Body('token') token: string) {
+      return this.authService.authenticateWithGoogle(token);
+   }
 }

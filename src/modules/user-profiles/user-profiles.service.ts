@@ -18,8 +18,7 @@ export class UserProfilesService {
     private readonly usersProfileRepository: UsersProfileRepository,
   ) {}
 
-  async create(createUserProfileDto: CreateUserProfileDto) {
-    const userId: string = createUserProfileDto.user;
+  async create(createUserProfileDto: CreateUserProfileDto, userId: string) {
     const userfound: User | null = await this.usersService.findById(userId);
     if (!userfound) {
       throw new NotFoundException('Usuario no encontrado');
@@ -41,5 +40,20 @@ export class UserProfilesService {
 
   async findOneById(id: string): Promise<UserProfile> {
     return this.usersProfileRepository.findById(id);
+  }
+
+  async findOneByUser(userId: string) {
+    const profile: UserProfile =
+      await this.usersProfileRepository.findByUser(userId);
+    if (!profile) {
+      throw new NotFoundException(
+        `El usuario ${userId} no tiene un perfil de usuario asociado`,
+      );
+    }
+    const { user, ...sanitizedUserProfile } = profile;
+    return {
+      message: `Perfil de usuario encontrado exitosamente para el usuario ${userId}`,
+      userProfile: sanitizedUserProfile,
+    };
   }
 }

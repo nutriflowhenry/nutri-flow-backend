@@ -22,7 +22,14 @@ export class UsersProfileRepository {
     });
     return this.userProfileRepository.save(newProfile);
   }
-  async findById(id: string): Promise<UserProfile> {
+  async findById(id: string): Promise<UserProfile | null> {
     return this.userProfileRepository.findOneBy({ id });
+  }
+
+  async findByUser(userId: string): Promise<UserProfile | null> {
+    return this.userProfileRepository.findOne({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
   }
 }
