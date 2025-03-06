@@ -1,18 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './users.repository';
 import { plainToInstance } from 'class-transformer';
 import { PublicUserDto } from './dto/public-user.dto';
 import { User } from './entities/user.entity';
+import { CreateAdminDto } from './dto/create-admin.dto';
 
 @Injectable()
 export class UsersService {
    constructor(private usersRepository: UsersRepository) {
    }
 
-   // create(createUserDto: CreateLocalUserDto) {
-   //    return 'This action adds a new user';
-   // }
+
+   async createAdmin(adminData: CreateAdminDto): Promise<void> {
+      return this.usersRepository.createAdmin(adminData);
+   }
 
 
    async findAll(): Promise<PublicUserDto[]> {
@@ -34,18 +36,40 @@ export class UsersService {
    }
 
 
-   async update(id: string, updateData: UpdateUserDto): Promise<User> {
+   async update(id: string, updateData: UpdateUserDto): Promise<PublicUserDto> {
       const user = await this.usersRepository.findById(id);
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
-      return this.usersRepository.update(id, updateData);
+      const updatedUser = await this.usersRepository.update(id, updateData);
+      return plainToInstance(PublicUserDto, updatedUser);
    }
 
 
-   async remove(id: string): Promise<void> {
+   async deactivateAccount(id: string): Promise<void> {
       const user = await this.usersRepository.findById(id);
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
-      await this.usersRepository.delete(id);
+      if (!user.isActive) {
+         throw new ConflictException(`User with ID ${id} is already deactivated`);
+      }
+
+      await this.usersRepository.deactivateUser(id);
+   }
+
+
+   async banUser(id: string): Promise<void> {
+      const user = await this.usersRepository.findById(id);
+      if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+
+      if (!user.isActive) {
+         throw new ConflictException(`User with ID ${id} is already deactivated`);
+      }
+
+      await this.usersRepository.banUser(id);
+   }
+
+
+   async checkIfAdminExists(): Promise<boolean> {
+      return this.usersRepository.checkIfAdminExists();
    }
 }
