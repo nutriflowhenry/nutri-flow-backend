@@ -59,7 +59,7 @@ export class UsersRepository {
 
 
    async delete(id: string): Promise<void> {
-      await this.repository.delete(id);
+      await this.repository.update(id, { isActive: false });
       console.log(`User with ID ${id} has been deleted`);
    }
 }
