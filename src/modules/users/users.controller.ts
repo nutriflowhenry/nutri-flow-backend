@@ -6,7 +6,7 @@ import {
    HttpCode,
    HttpStatus,
    UseGuards,
-   Req, Put
+   Req, Put, Param, Patch
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -28,26 +28,35 @@ export class UsersController {
    // }
 
 
-   @Get()
+   @Get('all')
    @HttpCode(HttpStatus.OK)
-   @Roles(Role.ADMIN, Role.USER)
+   @Roles(Role.ADMIN)
    @UseGuards(AuthGuard, RolesGuard)
    findAll(): Promise<PublicUserDto[]> {
       return this.usersService.findAll();
    }
 
 
-   @Get(':id')
+   @Get('me')
    @HttpCode(HttpStatus.OK)
    @UseGuards(AuthGuard)
-   findOne(
+   findMe(
       @Req() request: Request & { user: any }): Promise<PublicUserDto> {
       const requesterId = request.user.sub;
       return this.usersService.findOne(requesterId);
    }
 
 
-   @Put(':id')
+   @Get(':id')
+   @HttpCode(HttpStatus.OK)
+   @UseGuards(AuthGuard, RolesGuard)
+   @Roles(Role.ADMIN)
+   findOne(@Param('id') id: string): Promise<PublicUserDto> {
+      return this.usersService.findOne(id);
+   }
+
+
+   @Put('me')
    @HttpCode(HttpStatus.OK)
    @UseGuards(AuthGuard)
    update(
@@ -58,7 +67,18 @@ export class UsersController {
    }
 
 
-   @Delete(':id')
+   @Patch(':id/is-active')
+   @HttpCode(HttpStatus.OK)
+   @UseGuards(AuthGuard, RolesGuard)
+   @Roles(Role.ADMIN)
+   updateIsActive(
+      @Param('id') id: string,
+      @Body('isActive') isActive: boolean): Promise<User> {
+      return this.usersService.update(id, { isActive });
+   }
+
+
+   @Delete('me')
    @HttpCode(HttpStatus.NO_CONTENT)
    @UseGuards(AuthGuard)
    remove(
