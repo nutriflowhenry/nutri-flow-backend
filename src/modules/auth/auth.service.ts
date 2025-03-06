@@ -49,11 +49,13 @@ export class AuthService {
 
       console.log({ userPayload });
 
-      const token = this.jwtService.sign(userPayload);
+      const jwt = this.jwtService.sign(userPayload);
 
       return {
-         id: userPayload.sub,
-         token,
+         token: jwt,
+         userId: userPayload.sub,
+         userName: userPayload.name,
+         email: userPayload.email,
       };
    }
 
@@ -104,54 +106,4 @@ export class AuthService {
          throw new UnauthorizedException('Invalid Google Token');
       }
    }
-
-
-   // async validateAuth0User(email: string, auth0Id: string, name: string) {
-   //    let user = await this.usersRepository.findByAuthId(auth0Id);
-   //    if (!user) user = await this.usersRepository.createAuth0User({ auth0Id, email, name });
-   //
-   //    const payload = {
-   //       sub: user.id,
-   //       name: user.name,
-   //       email: user.email,
-   //       role: user.role,
-   //    };
-   //
-   //    console.log({ payload });
-   //
-   //    return {
-   //       id: payload.sub,
-   //       token: this.jwtService.sign(payload)
-   //    };
-   // }
-   //
-   // async exchangeCodeForToken(code: any) {
-   //    console.log('Request body:', {
-   //       grant_type: 'authorization_code',
-   //       client_id: process.env.AUTH0_CLIENT_ID,
-   //       client_secret: process.env.AUTH0_CLIENT_SECRET,
-   //       redirect_uri: process.env.AUTH0_CALLBACK_URL,
-   //       code,
-   //    });
-   //
-   //    const response = await axios.post(`https://${process.env.AUTH0_DOMAIN}/oauth/token`, {
-   //       grant_type: 'authorization_code',
-   //       client_id: process.env.AUTH0_CLIENT_ID,
-   //       client_secret: process.env.AUTH0_CLIENT_SECRET,
-   //       redirect_uri: process.env.AUTH0_CALLBACK_URL,
-   //       code
-   //    });
-   //
-   //    console.log(response.data);
-   //    return response.data; // { access_token, id_token, ... }
-   // }
-   //
-   // async fetchUserProfile(accessToken: any) {
-   //    const response = await axios.get(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
-   //       headers: { Authorization: `Bearer ${accessToken}` },
-   //    });
-   //
-   //    console.log(response.data);
-   //    return response.data; // { sub, email, name, ... }
-   // }
 }
