@@ -3,12 +3,16 @@ import {
   // Get,
   Post,
   Body,
+  UseGuards,
+  Get,
+  Req,
   // Patch,
   // Param,
   // Delete,
 } from '@nestjs/common';
 import { UserProfilesService } from './user-profiles.service';
 import { CreateUserProfileDto } from './dto/create-user-profile.dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
 // import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 
 @Controller('user-profiles')
@@ -16,8 +20,18 @@ export class UserProfilesController {
   constructor(private readonly userProfilesService: UserProfilesService) {}
 
   @Post()
-  create(@Body() createUserProfileDto: CreateUserProfileDto) {
-    return this.userProfilesService.create(createUserProfileDto);
+  @UseGuards(AuthGuard)
+  create(
+    @Body() createUserProfileDto: CreateUserProfileDto,
+    @Req() req: { user: { sub: string } },
+  ) {
+    return this.userProfilesService.create(createUserProfileDto, req.user.sub);
+  }
+
+  @Get()
+  @UseGuards(AuthGuard)
+  findOneByUser(@Req() req: { user: { sub: string } }) {
+    return this.userProfilesService.findOneByUser(req.user.sub);
   }
 
   // @Get()
