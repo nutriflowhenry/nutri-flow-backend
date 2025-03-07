@@ -13,10 +13,6 @@ import { Gender } from '../enums/gender.enum';
 
 export class CreateUserProfileDto {
   @IsNotEmpty()
-  @IsUUID()
-  user: string;
-
-  @IsNotEmpty()
   @IsDate()
   @Type(() => Date)
   birthdate: Date;
