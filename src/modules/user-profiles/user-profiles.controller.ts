@@ -1,6 +1,5 @@
 import {
   Controller,
-  // Get,
   Post,
   Body,
   // Patch,
@@ -19,25 +18,4 @@ export class UserProfilesController {
   create(@Body() createUserProfileDto: CreateUserProfileDto) {
     return this.userProfilesService.create(createUserProfileDto);
   }
-
-  // @Get()
-  // findAll() {
-
-  //   return this.userProfilesService.findAll();
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.userProfilesService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserProfileDto: UpdateUserProfileDto) {
-  //   return this.userProfilesService.update(+id, updateUserProfileDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.userProfilesService.remove(+id);
-  // }
 }

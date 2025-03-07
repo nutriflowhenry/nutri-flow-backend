@@ -9,6 +9,7 @@ import { FoodTrackerModule } from './modules/food-tracker/food-tracker.module';
 import typeOrmConfig from './config/typeOrm.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { PostModule } from './modules/post/post.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { JwtModule } from '@nestjs/jwt';
       signOptions: { expiresIn: '1h' },
       secret: process.env.JWT_SECRET,
     }),
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],
