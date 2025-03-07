@@ -6,7 +6,7 @@ import { FoodTracker } from './entities/food-tracker.entity';
 import { UserProfilesService } from '../user-profiles/user-profiles.service';
 import { UserProfile } from '../user-profiles/entities/user-profile.entity';
 import { GetFoodTrackerDto } from './dto/get-food-tracker.dto';
-import { S3Service } from '../images/aws/S3-service';
+import { S3Service } from '../images/aws/s3-service';
 
 @Injectable()
 export class FoodTrackerService {

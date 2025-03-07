@@ -5,8 +5,8 @@ import { plainToInstance } from 'class-transformer';
 import { PublicUserDto } from './dto/public-user.dto';
 import { User } from './entities/user.entity';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { S3Service } from '../images/aws/S3-service';
-import { CloudFrontService } from '../images/aws/CloudFront.service';
+import { S3Service } from '../images/aws/s3-service';
+import { CloudFrontService } from '../images/aws/cloud-front.service';
 
 @Injectable()
 export class UsersService {

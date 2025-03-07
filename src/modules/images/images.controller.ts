@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import { CloudFrontService } from './aws/CloudFront.service';
+import { CloudFrontService } from './aws/cloud-front.service';
 import { FoodTrackerService } from '../food-tracker/food-tracker.service';
 
 @Controller('upload')

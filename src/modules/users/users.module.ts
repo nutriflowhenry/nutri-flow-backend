@@ -4,7 +4,7 @@ import { UsersController } from './users.controller';
 import { UsersRepository } from './users.repository';
 import { User } from './entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CloudFrontService } from '../images/aws/CloudFront.service';
+import { CloudFrontService } from '../images/aws/cloud-front.service';
 
 @Module({
     controllers: [UsersController],
