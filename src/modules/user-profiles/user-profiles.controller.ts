@@ -31,7 +31,7 @@ export class UserProfilesController {
   @Get()
   @UseGuards(AuthGuard)
   findOneByUser(@Req() req: { user: { sub: string } }) {
-    return this.userProfilesService.findOneByUser(req.user.sub);
+    return this.userProfilesService.findOneByUserId(req.user.sub);
   }
 
   // @Get()

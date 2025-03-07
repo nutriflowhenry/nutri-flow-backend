@@ -19,8 +19,9 @@ export class FoodTrackerService {
     userId: string,
   ) {
     try {
-      const validateUserProfile: UserProfile =
-        await this.usersProfileServise.findOneByUserId(userId);
+      const validateUserProfile: UserProfile = (
+        await this.usersProfileServise.findOneByUserId(userId)
+      ).userProfile;
       const foodTracker: FoodTracker =
         await this.foodTrackerRepository.createFoodTracker(
           foodTrackerData,
@@ -41,8 +42,9 @@ export class FoodTrackerService {
   }
 
   async getDailyCalories(userId: string, date?: string) {
-    const validateUserProfile: UserProfile =
-      await this.usersProfileServise.findOneByUserId(userId);
+    const validateUserProfile: UserProfile = (
+      await this.usersProfileServise.findOneByUserId(userId)
+    ).userProfile;
     const today: string = date || new Date().toISOString();
     const dailyFoodTracker: FoodTracker[] =
       await this.foodTrackerRepository.getDailyCalories(
@@ -66,8 +68,9 @@ export class FoodTrackerService {
     const today: string = getFoodTrackerData.date || new Date().toISOString();
     const limit: number = getFoodTrackerData.limit || 10;
     const page: number = getFoodTrackerData.page || 1;
-    const validateUserProfile: UserProfile =
-      await this.usersProfileServise.findOneByUserId(userId);
+    const validateUserProfile: UserProfile = (
+      await this.usersProfileServise.findOneByUserId(userId)
+    ).userProfile;
     const dailyFoodTracker =
       await this.foodTrackerRepository.getDailyFooodTracker(
         validateUserProfile,
@@ -106,8 +109,9 @@ export class FoodTrackerService {
     userId: string,
     foodTrackerId: string,
   ): Promise<FoodTracker> {
-    const validUserProfile: UserProfile =
-      await this.usersProfileServise.findOneByUserId(userId);
+    const validUserProfile: UserProfile = (
+      await this.usersProfileServise.findOneByUserId(userId)
+    ).userProfile;
     const allFoodTracker: FoodTracker[] =
       await this.getAllFoodTrackerByUser(validUserProfile);
     const foodTracker: FoodTracker = allFoodTracker.find(
