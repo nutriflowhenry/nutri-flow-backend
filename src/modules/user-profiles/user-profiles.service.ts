@@ -42,4 +42,14 @@ export class UserProfilesService {
   async findOneById(id: string): Promise<UserProfile> {
     return this.usersProfileRepository.findById(id);
   }
+
+  async findOneByUserId(userId: string): Promise<UserProfile> {
+    const userProfile: UserProfile =
+      await this.usersProfileRepository.findOneByUserId(userId);
+    if (!userProfile)
+      throw new NotFoundException(
+        `El usuario ${userId} no cuenta con un perfil asociado`,
+      );
+    return userProfile;
+  }
 }
