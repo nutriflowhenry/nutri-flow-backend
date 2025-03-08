@@ -4,12 +4,13 @@ import { UsersController } from './users.controller';
 import { UsersRepository } from './users.repository';
 import { User } from './entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CloudFrontService } from '../images/aws/cloud-front.service';
+import { AwsModule } from '../aws/aws.module';
+
 
 @Module({
     controllers: [UsersController],
-    imports: [TypeOrmModule.forFeature([User])],
-    providers: [UsersService, UsersRepository, CloudFrontService],
+    imports: [TypeOrmModule.forFeature([User]), AwsModule],
+    providers: [UsersService, UsersRepository],
     exports: [UsersRepository, UsersService],
 })
 export class UsersModule implements OnModuleInit {

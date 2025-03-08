@@ -10,6 +10,14 @@ import typeOrmConfig from './config/typeOrm.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { S3Module } from 'nestjs-s3';
+import { SecretsManagerService } from './modules/aws/secrets-manager.service';
+import { CloudFrontService } from './modules/aws/cloud-front.service';
+import { ImagesController } from './modules/images/images.controller';
+import { FoodTrackerService } from './modules/food-tracker/food-tracker.service';
+import { UserProfilesModule } from './modules/user-profiles/user-profiles.module';
+import { S3Service } from './modules/aws/s3-service';
+import { ImagesModule } from './modules/images/images.module';
+import { AwsModule } from './modules/aws/aws.module';
 
 @Module({
     imports: [
@@ -40,11 +48,14 @@ import { S3Module } from 'nestjs-s3';
         }),
         AuthModule,
         UsersModule,
-        WaterTrackerModule,
         FoodTrackerModule,
+        UserProfilesModule,
+        WaterTrackerModule,
+        ImagesModule,
+        AwsModule
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [AppService]
 })
 export class AppModule {
 }

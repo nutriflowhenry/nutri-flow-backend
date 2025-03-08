@@ -12,84 +12,83 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersRepository {
-   constructor(@InjectRepository(User) private repository: Repository<User>) {
-   }
+    constructor(@InjectRepository(User) private repository: Repository<User>) {
+    }
+
+    async createAdmin(adminData: CreateAdminDto) {
+        await this.repository.save({
+            ...adminData,
+            password: await bcrypt.hash(adminData.password, 10),
+            role: Role.ADMIN
+        });
+    }
 
 
-   async createAdmin(adminData: CreateAdminDto) {
-      await this.repository.save({
-         ...adminData,
-         password: await bcrypt.hash(adminData.password, 10),
-         role: Role.ADMIN
-      });
-   }
+    async createLocalUser(userData: Omit<CreateLocalUserDto, 'passwordConfirmation'>): Promise<User> {
+        return this.repository.save(userData);
+    }
 
 
-   async createLocalUser(userData: Omit<CreateLocalUserDto, 'passwordConfirmation'>): Promise<User> {
-      return this.repository.save(userData);
-   }
+    async createAuth0User(userData: CreateAuth0UserDto): Promise<User> {
+        return this.repository.save({ ...userData, provider: AuthProvider.AUTH0 });
+    }
 
 
-   async createAuth0User(userData: CreateAuth0UserDto): Promise<User> {
-      return this.repository.save({ ...userData, provider: AuthProvider.AUTH0 });
-   }
+    async findAll(): Promise<User[]> {
+        return this.repository.find();
+    }
 
 
-   async findAll(): Promise<User[]> {
-      return this.repository.find();
-   }
+    async findById(id: string): Promise<User> {
+        return this.repository.findOne({
+            where: { id },
+            relations: { userProfile: true },
+        });
+    }
 
 
-   async findById(id: string): Promise<User> {
-      return this.repository.findOne({
-         where: { id },
-         relations: { userProfile: true },
-      });
-   }
+    async findByAuthId(auth0Id: string): Promise<User> {
+        return this.repository.findOneBy({ auth0Id });
+    }
 
 
-   async findByAuthId(auth0Id: string): Promise<User> {
-      return this.repository.findOneBy({ auth0Id });
-   }
+    async findByEmail(email: string): Promise<User> {
+        return this.repository.findOneBy({ email });
+    }
 
 
-   async findByEmail(email: string): Promise<User> {
-      return this.repository.findOneBy({ email });
-   }
+    async update(id: string, updateData: UpdateUserDto): Promise<User> {
+        if (Object.keys(updateData).length === 0) {
+            throw new BadRequestException('No update data provided');
+        }
+
+        const updatedFields = { ...updateData };
+
+        if (updatedFields.password) {
+            updatedFields.password = await bcrypt.hash(updatedFields.password, 10);
+        }
+
+        await this.repository.update(id, updatedFields);
+
+        console.log(`User with ID ${id} has been updated`);
+        return this.repository.findOneBy({ id });
+    }
 
 
-   async update(id: string, updateData: UpdateUserDto): Promise<User> {
-      if (Object.keys(updateData).length === 0) {
-         throw new BadRequestException('No update data provided');
-      }
-
-      const updatedFields = { ...updateData };
-
-      if (updatedFields.password) {
-         updatedFields.password = await bcrypt.hash(updatedFields.password, 10);
-      }
-
-      await this.repository.update(id, updatedFields);
-
-      console.log(`User with ID ${id} has been updated`);
-      return this.repository.findOneBy({ id });
-   }
+    async deactivateUser(id: string): Promise<void> {
+        await this.repository.update(id, { isActive: false });
+        console.log(`User with ID ${id} has been deactivated`);
+    }
 
 
-   async deactivateUser(id: string): Promise<void> {
-      await this.repository.update(id, { isActive: false });
-      console.log(`User with ID ${id} has been deactivated`);
-   }
+    async banUser(id: string): Promise<void> {
+        await this.repository.update(id, { isActive: false });
+        console.log(`User with ID ${id} has been banned`);
+    }
 
 
-   async banUser(id: string): Promise<void> {
-      await this.repository.update(id, { isActive: false });
-      console.log(`User with ID ${id} has been banned`);
-   }
-
-
-   async checkIfAdminExists(): Promise<boolean> {
-      const admin = await this.repository.findOneBy({ role: Role.ADMIN });
-      return !!admin;
-   }
+    async checkIfAdminExists(): Promise<boolean> {
+        const admin = await this.repository.findOneBy({ role: Role.ADMIN });
+        return !!admin;
+    }
 }
