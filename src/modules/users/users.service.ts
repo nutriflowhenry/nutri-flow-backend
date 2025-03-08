@@ -5,8 +5,8 @@ import { plainToInstance } from 'class-transformer';
 import { PublicUserDto } from './dto/public-user.dto';
 import { User } from './entities/user.entity';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { S3Service } from '../images/aws/s3-service';
-import { CloudFrontService } from '../images/aws/cloud-front.service';
+import { S3Service } from '../aws/s3-service';
+import { CloudFrontService } from '../aws/cloud-front.service';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +23,13 @@ export class UsersService {
 
 
     async findAll(): Promise<PublicUserDto[]> {
-        const users = await this.usersRepository.findAll();
+        let users = await this.usersRepository.findAll();
+
+        users.map(async user => ({
+            ...user,
+            profilePicture: await this.cloudFrontService.generateSignedUrl(user.profilePicture),
+        }));
+
         return plainToInstance(PublicUserDto, users);
     }
 
@@ -38,7 +44,7 @@ export class UsersService {
         if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
         if (user?.profilePicture) {
-            user.profilePicture = this.cloudFrontService.generateSignedUrl(user.profilePicture);
+            user.profilePicture = await this.cloudFrontService.generateSignedUrl(user.profilePicture);
         }
 
         return plainToInstance(PublicUserDto, user);
