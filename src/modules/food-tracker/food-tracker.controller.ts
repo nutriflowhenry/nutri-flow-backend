@@ -15,7 +15,6 @@ import { FoodTrackerService } from './food-tracker.service';
 import { CreateFoodTrackerDto } from './dto/create-food-tracker.dto';
 import { UpdateFoodTrackerDto } from './dto/update-food-tracker.dto';
 import { GetFoodTrackerDto } from './dto/get-food-tracker.dto';
-import { AnyError } from 'typeorm';
 import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller('food-tracker')
@@ -24,13 +23,10 @@ export class FoodTrackerController {
 
   @UseGuards(AuthGuard)
   @Post('create')
-  // Para pruebas, se pasa el id del usuario por parametro
   async createFoodTracker(
     @Req() req: { user: { sub: string } },
     @Body() foodTrackeData: CreateFoodTrackerDto,
-    // @Query() userId: any,
   ) {
-    // console.log(userId);
     return await this.foodTrackerService.createFoodTracker(
       foodTrackeData,
       req.user.sub,
@@ -58,7 +54,7 @@ export class FoodTrackerController {
   ) {
     return await this.foodTrackerService.getDailyFoodTracker(
       req.user.sub,
-      queryDate.date,
+      queryDate,
     );
   }
 

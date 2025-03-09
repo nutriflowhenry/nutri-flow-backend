@@ -42,18 +42,16 @@ export class UserProfilesService {
     return this.usersProfileRepository.findById(id);
   }
 
-  async findOneByUser(userId: string) {
-    const profile: UserProfile =
-      await this.usersProfileRepository.findByUser(userId);
-    if (!profile) {
+  async findOneByUserId(userId: string) {
+    const userProfile: UserProfile =
+      await this.usersProfileRepository.findOneByUserId(userId);
+    if (!userProfile)
       throw new NotFoundException(
-        `El usuario ${userId} no tiene un perfil de usuario asociado`,
+        `El usuario ${userId} no cuenta con un perfil asociado`,
       );
-    }
-    const { user, ...sanitizedUserProfile } = profile;
     return {
       message: `Perfil de usuario encontrado exitosamente para el usuario ${userId}`,
-      userProfile: sanitizedUserProfile,
+      userProfile,
     };
   }
 }

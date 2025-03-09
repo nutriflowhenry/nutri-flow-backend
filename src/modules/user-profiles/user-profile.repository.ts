@@ -26,10 +26,9 @@ export class UsersProfileRepository {
     return this.userProfileRepository.findOneBy({ id });
   }
 
-  async findByUser(userId: string): Promise<UserProfile | null> {
+  async findOneByUserId(userId: string): Promise<UserProfile | null> {
     return this.userProfileRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['user'],
     });
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FoodTracker } from './entities/food-tracker.entity';
 import { Between, Repository } from 'typeorm';
@@ -22,54 +22,35 @@ export class FoodTrackerRepository {
       ...foodTrackerData,
       userProfile,
     });
-    console.log('food');
-    console.log(foodTracker);
     return await this.foodTrackerRepository.save(foodTracker);
   }
 
   async getDailyFooodTracker(
     profile: UserProfile,
+    limit: number,
+    page: number,
     date?: string,
     timeZone: string = 'America/Mexico_City',
   ) {
-    console.log('up2');
-    console.log(profile);
-    // 1. Convertir la fecha a la zona horaria del usuario
-    const userDate = date
-      ? DateTime.fromJSDate(new Date(date)).setZone(timeZone)
-      : DateTime.now().setZone(timeZone);
+    const dayRange = this.getStartAndEndOfDay(date, timeZone);
 
-    // 2. Calcular inicio y fin del día EN LA ZONA HORARIA DEL USUARIO
-    const startOfDay = userDate.startOf('day');
-    const endOfDay = userDate.endOf('day');
-
-    // 3. Convertir a UTC para la consulta en BD
-    const startUTC = startOfDay.toUTC().toJSDate();
-    const endUTC = endOfDay.toUTC().toJSDate();
-
-    // const queryDate = new Date(date) || new Date();
-    // const startOfDay = new Date(
-    //   Date.UTC(
-    //     queryDate.getUTCFullYear(),
-    //     queryDate.getUTCMonth(),
-    //     queryDate.getUTCDate(),
-    //   ),
-    // );
-
-    // const endOfDay = new Date(
-    //   Date.UTC(
-    //     queryDate.getUTCFullYear(),
-    //     queryDate.getUTCMonth(),
-    //     queryDate.getUTCDate() + 1,
-    //   ),
-    // );
-
-    return this.foodTrackerRepository.find({
+    const [results, total] = await this.foodTrackerRepository.findAndCount({
       where: {
-        createdAt: Between(startUTC, endUTC),
         userProfile: profile,
+        createdAt: Between(dayRange.startUTC, dayRange.endUTC),
       },
+      order: {
+        createdAt: 'DESC',
+        id: 'ASC',
+      },
+      skip: (page - 1) * limit,
+      take: limit,
     });
+
+    return {
+      results,
+      total,
+    };
   }
 
   async getAllFoodTrackerByUser(
@@ -82,6 +63,38 @@ export class FoodTrackerRepository {
     });
   }
 
+  async getDailyCalories(
+    profile: UserProfile,
+    date: string,
+    timeZone: string = 'America/Mexico_City',
+  ): Promise<FoodTracker[] | []> {
+    const dayRange = this.getStartAndEndOfDay(date, timeZone);
+    return this.foodTrackerRepository.find({
+      where: {
+        createdAt: Between(dayRange.startUTC, dayRange.endUTC),
+        userProfile: profile,
+      },
+      select: ['calories'],
+    });
+  }
+
+  getStartAndEndOfDay(date?: string, timeZone: string = 'America/Mexico_City') {
+    const userDate = date
+      ? DateTime.fromJSDate(new Date(date)).setZone(timeZone)
+      : DateTime.now().setZone(timeZone);
+
+    const startOfDay = userDate.startOf('day');
+    const endOfDay = userDate.endOf('day');
+
+    const startUTC = startOfDay.toUTC().toJSDate();
+    const endUTC = endOfDay.toUTC().toJSDate();
+
+    return {
+      startUTC,
+      endUTC,
+    };
+  }
+
   async delete(foodTracker: FoodTracker): Promise<void> {
     await this.foodTrackerRepository.remove(foodTracker);
   }
@@ -90,10 +103,27 @@ export class FoodTrackerRepository {
     validateFoodTracker: FoodTracker,
     updateFoodTrackerData: UpdateFoodTrackerDto,
   ) {
+    const dtoFields: string[] = Object.keys(updateFoodTrackerData);
+    if (dtoFields.length === 0) {
+      throw new BadRequestException(
+        'No se proporcionaron datos para realizar una actualización',
+      );
+    }
+    const originalFoodTracker: FoodTracker = { ...validateFoodTracker };
     this.foodTrackerRepository.merge(
       validateFoodTracker,
       updateFoodTrackerData,
     );
+    const isNotUpdated: boolean = dtoFields.every(
+      (field) => validateFoodTracker[field] === originalFoodTracker[field],
+    );
+
+    if (isNotUpdated) {
+      throw new BadRequestException(
+        'No se pudieron realizar cambios en el registro, revise los valores enviados',
+      );
+    }
+
     await this.foodTrackerRepository.save(validateFoodTracker);
     return validateFoodTracker;
   }
