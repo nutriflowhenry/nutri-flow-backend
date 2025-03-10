@@ -29,8 +29,9 @@ export class StripeService {
         payment_method_types: ['card'],
         mode: 'subscription',
         line_items: [{ price: baseSubscriptionPriceId, quantity: 1 }],
-        success_url: 'http://localhost:3001/payments/success/checkout/session',
-        cancel_url: 'https://tu-sitio.com/cancel',
+        success_url:
+          'http://localhost:3000/dashboard?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'http://localhost:3000/dashboard',
         expires_at: expiresAt,
       });
     } catch (error) {
