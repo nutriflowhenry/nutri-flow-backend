@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './users.repository';
 import { plainToInstance } from 'class-transformer';
@@ -8,68 +12,80 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 
 @Injectable()
 export class UsersService {
-   constructor(private usersRepository: UsersRepository) {
-   }
+  constructor(private usersRepository: UsersRepository) {}
 
+  async createAdmin(adminData: CreateAdminDto): Promise<void> {
+    return this.usersRepository.createAdmin(adminData);
+  }
 
-   async createAdmin(adminData: CreateAdminDto): Promise<void> {
-      return this.usersRepository.createAdmin(adminData);
-   }
+  async findAll(): Promise<PublicUserDto[]> {
+    const users = await this.usersRepository.findAll();
+    return plainToInstance(PublicUserDto, users);
+  }
 
+  async findById(id: string): Promise<User> {
+    return this.usersRepository.findById(id);
+  }
 
-   async findAll(): Promise<PublicUserDto[]> {
-      const users = await this.usersRepository.findAll();
-      return plainToInstance(PublicUserDto, users);
-   }
+  async findOne(id: string): Promise<PublicUserDto> {
+    const user = await this.usersRepository.findById(id);
+    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
+    return plainToInstance(PublicUserDto, user);
+  }
 
-   async findById(id: string): Promise<User> {
-      return this.usersRepository.findById(id);
-   }
+  async update(id: string, updateData: UpdateUserDto): Promise<PublicUserDto> {
+    const user = await this.usersRepository.findById(id);
+    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
+    const updatedUser = await this.usersRepository.update(id, updateData);
+    return plainToInstance(PublicUserDto, updatedUser);
+  }
 
-   async findOne(id: string): Promise<PublicUserDto> {
-      const user = await this.usersRepository.findById(id);
-      if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+  async deactivateAccount(id: string): Promise<void> {
+    const user = await this.usersRepository.findById(id);
+    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
-      return plainToInstance(PublicUserDto, user);
-   }
+    if (!user.isActive) {
+      throw new ConflictException(`User with ID ${id} is already deactivated`);
+    }
 
+    await this.usersRepository.deactivateUser(id);
+  }
 
-   async update(id: string, updateData: UpdateUserDto): Promise<PublicUserDto> {
-      const user = await this.usersRepository.findById(id);
-      if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+  async banUser(id: string): Promise<void> {
+    const user = await this.usersRepository.findById(id);
+    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
-      const updatedUser = await this.usersRepository.update(id, updateData);
-      return plainToInstance(PublicUserDto, updatedUser);
-   }
+    if (!user.isActive) {
+      throw new ConflictException(`User with ID ${id} is already deactivated`);
+    }
 
+    await this.usersRepository.banUser(id);
+  }
 
-   async deactivateAccount(id: string): Promise<void> {
-      const user = await this.usersRepository.findById(id);
-      if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+  async checkIfAdminExists(): Promise<boolean> {
+    return this.usersRepository.checkIfAdminExists();
+  }
 
-      if (!user.isActive) {
-         throw new ConflictException(`User with ID ${id} is already deactivated`);
-      }
+  async findByStripeId(stripeId: string): Promise<User> {
+    const user: User = await this.usersRepository.findByStripeId(stripeId);
+    if (!user)
+      throw new NotFoundException(
+        `El usuario buscado no tiene una cuenta en Stripe`,
+      );
+    return user;
+  }
 
-      await this.usersRepository.deactivateUser(id);
-   }
+  async addStripeId(stripeId: string, userId: string): Promise<User> {
+    return this.usersRepository.addStripeId(stripeId, userId);
+  }
 
+  async updateSubscriptionType(userId: string): Promise<void> {
+    return this.usersRepository.updateSubscriptionType(userId);
+  }
 
-   async banUser(id: string): Promise<void> {
-      const user = await this.usersRepository.findById(id);
-      if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-
-      if (!user.isActive) {
-         throw new ConflictException(`User with ID ${id} is already deactivated`);
-      }
-
-      await this.usersRepository.banUser(id);
-   }
-
-
-   async checkIfAdminExists(): Promise<boolean> {
-      return this.usersRepository.checkIfAdminExists();
-   }
+  async downgradeSubscriptionType(userId: string): Promise<void> {
+    return this.usersRepository.downgradeSubscriptionType(userId);
+  }
 }
