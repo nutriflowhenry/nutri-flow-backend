@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateFoodTrackerDto } from './dto/create-food-tracker.dto';
 import { UpdateFoodTrackerDto } from './dto/update-food-tracker.dto';
 import { FoodTrackerRepository } from './food-tracker.repository';
@@ -135,6 +139,22 @@ export class FoodTrackerService {
     await this.foodTrackerRepository.delete(validateFoodTracker);
     return {
       message: `El registro de foodTracker con id ${deletedId} fue borrado exitosamente`,
+    };
+  }
+
+  async deactivateFoodTracker(foodTrackerId: string, userId: string) {
+    const validateFoodTracker: FoodTracker = await this.validateUpadateDelete(
+      userId,
+      foodTrackerId,
+    );
+    if (!validateFoodTracker.isActive) {
+      throw new ConflictException(
+        'El registro de comida ya se encuentra desactivado',
+      );
+    }
+    await this.foodTrackerRepository.deactivate(validateFoodTracker);
+    return {
+      message: `El registro de foodTracker con id ${validateFoodTracker.id} fue desactivado exitosamente`,
     };
   }
 
