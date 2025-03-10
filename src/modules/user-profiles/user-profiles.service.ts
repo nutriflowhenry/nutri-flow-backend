@@ -3,13 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-// import { CreateUserProfileDto } from './dto/create-user-profile.dto';
-// import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { UsersProfileRepository } from './user-profile.repository';
 import { UserProfile } from './entities/user-profile.entity';
 import { CreateUserProfileDto } from './dto/create-user-profile.dto';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
+import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 
 @Injectable()
 export class UserProfilesService {
@@ -52,6 +51,20 @@ export class UserProfilesService {
     return {
       message: `Perfil de usuario encontrado exitosamente para el usuario ${userId}`,
       userProfile,
+    };
+  }
+
+  async update(userId: string, updateUserProfileDto: UpdateUserProfileDto) {
+    const userProfile: UserProfile = (await this.findOneByUserId(userId))
+      .userProfile;
+    const updatedUserProfile: UserProfile =
+      await this.usersProfileRepository.update(
+        userProfile,
+        updateUserProfileDto,
+      );
+    return {
+      message: `El perfil del usuario con id ${userId} se actualizó con exito`,
+      updatedUserProfile,
     };
   }
 }

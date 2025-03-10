@@ -3,6 +3,7 @@ import {
   IsDate,
   IsDecimal,
   IsEnum,
+  IsISO8601,
   IsNotEmpty,
   IsNumber,
   IsUUID,
@@ -13,9 +14,8 @@ import { Gender } from '../enums/gender.enum';
 
 export class CreateUserProfileDto {
   @IsNotEmpty()
-  @IsDate()
-  @Type(() => Date)
-  birthdate: Date;
+  @IsISO8601({ strict: true })
+  birthdate: string;
 
   @IsNotEmpty()
   @IsEnum(Gender)

@@ -29,6 +29,9 @@ export class FoodTracker {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
+
   @ManyToOne(() => UserProfile, (userProfile) => userProfile.foodTrackers, {
     onDelete: 'CASCADE',
   })
