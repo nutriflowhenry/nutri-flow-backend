@@ -9,87 +9,101 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '../auth/enums/roles.enum';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import * as bcrypt from 'bcrypt';
+import { SubscriptionType } from './enums/subscription-type.enum';
 
 @Injectable()
 export class UsersRepository {
-   constructor(@InjectRepository(User) private repository: Repository<User>) {
-   }
+  constructor(@InjectRepository(User) private repository: Repository<User>) {}
 
+  async createAdmin(adminData: CreateAdminDto) {
+    await this.repository.save({
+      ...adminData,
+      password: await bcrypt.hash(adminData.password, 10),
+      role: Role.ADMIN,
+    });
+  }
 
-   async createAdmin(adminData: CreateAdminDto) {
-      await this.repository.save({
-         ...adminData,
-         password: await bcrypt.hash(adminData.password, 10),
-         role: Role.ADMIN
-      });
-   }
+  async createLocalUser(
+    userData: Omit<CreateLocalUserDto, 'passwordConfirmation'>,
+  ): Promise<User> {
+    return this.repository.save(userData);
+  }
 
+  async createAuth0User(userData: CreateAuth0UserDto): Promise<User> {
+    return this.repository.save({ ...userData, provider: AuthProvider.AUTH0 });
+  }
 
-   async createLocalUser(userData: Omit<CreateLocalUserDto, 'passwordConfirmation'>): Promise<User> {
-      return this.repository.save(userData);
-   }
+  async findAll(): Promise<User[]> {
+    return this.repository.find();
+  }
 
+  async findById(id: string): Promise<User> {
+    return this.repository.findOne({
+      where: { id },
+      relations: { userProfile: true },
+    });
+  }
 
-   async createAuth0User(userData: CreateAuth0UserDto): Promise<User> {
-      return this.repository.save({ ...userData, provider: AuthProvider.AUTH0 });
-   }
+  async findByAuthId(auth0Id: string): Promise<User> {
+    return this.repository.findOneBy({ auth0Id });
+  }
 
+  async findByEmail(email: string): Promise<User> {
+    return this.repository.findOneBy({ email });
+  }
 
-   async findAll(): Promise<User[]> {
-      return this.repository.find();
-   }
+  async update(id: string, updateData: UpdateUserDto): Promise<User> {
+    if (Object.keys(updateData).length === 0) {
+      throw new BadRequestException('No update data provided');
+    }
 
+    const updatedFields = { ...updateData };
 
-   async findById(id: string): Promise<User> {
-      return this.repository.findOne({
-         where: { id },
-         relations: { userProfile: true },
-      });
-   }
+    if (updatedFields.password) {
+      updatedFields.password = await bcrypt.hash(updatedFields.password, 10);
+    }
 
+    await this.repository.update(id, updatedFields);
 
-   async findByAuthId(auth0Id: string): Promise<User> {
-      return this.repository.findOneBy({ auth0Id });
-   }
+    console.log(`User with ID ${id} has been updated`);
+    return this.repository.findOneBy({ id });
+  }
 
+  async deactivateUser(id: string): Promise<void> {
+    await this.repository.update(id, { isActive: false });
+    console.log(`User with ID ${id} has been deactivated`);
+  }
 
-   async findByEmail(email: string): Promise<User> {
-      return this.repository.findOneBy({ email });
-   }
+  async banUser(id: string): Promise<void> {
+    await this.repository.update(id, { isActive: false });
+    console.log(`User with ID ${id} has been banned`);
+  }
 
+  async checkIfAdminExists(): Promise<boolean> {
+    const admin = await this.repository.findOneBy({ role: Role.ADMIN });
+    return !!admin;
+  }
 
-   async update(id: string, updateData: UpdateUserDto): Promise<User> {
-      if (Object.keys(updateData).length === 0) {
-         throw new BadRequestException('No update data provided');
-      }
+  async findByStripeId(stripeCustomerId: string): Promise<User> {
+    return await this.repository.findOne({
+      where: { stripeCustomerId },
+    });
+  }
 
-      const updatedFields = { ...updateData };
+  async addStripeId(stripeId: string, userId: string): Promise<User> {
+    await this.repository.update(userId, { stripeCustomerId: stripeId });
+    return this.repository.findOne({ where: { id: userId } });
+  }
 
-      if (updatedFields.password) {
-         updatedFields.password = await bcrypt.hash(updatedFields.password, 10);
-      }
+  async updateSubscriptionType(userId: string): Promise<void> {
+    await this.repository.update(userId, {
+      subscriptionType: SubscriptionType.PREMIUM,
+    });
+  }
 
-      await this.repository.update(id, updatedFields);
-
-      console.log(`User with ID ${id} has been updated`);
-      return this.repository.findOneBy({ id });
-   }
-
-
-   async deactivateUser(id: string): Promise<void> {
-      await this.repository.update(id, { isActive: false });
-      console.log(`User with ID ${id} has been deactivated`);
-   }
-
-
-   async banUser(id: string): Promise<void> {
-      await this.repository.update(id, { isActive: false });
-      console.log(`User with ID ${id} has been banned`);
-   }
-
-
-   async checkIfAdminExists(): Promise<boolean> {
-      const admin = await this.repository.findOneBy({ role: Role.ADMIN });
-      return !!admin;
-   }
+  async downgradeSubscriptionType(userId: string): Promise<void> {
+    await this.repository.update(userId, {
+      subscriptionType: SubscriptionType.FREE,
+    });
+  }
 }
