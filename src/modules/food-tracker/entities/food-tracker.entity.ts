@@ -23,8 +23,14 @@ export class FoodTracker {
   @Column({ type: 'varchar', length: 50, default: '' })
   description: string;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @Column({
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   createdAt: Date;
+
+  // @CreateDateColumn({ type: 'timestamptz' })
+  // createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
