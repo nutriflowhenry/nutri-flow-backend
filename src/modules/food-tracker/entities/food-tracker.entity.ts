@@ -1,7 +1,6 @@
 import { UserProfile } from 'src/modules/user-profiles/entities/user-profile.entity';
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -35,12 +34,15 @@ export class FoodTracker {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
-  @Column({ type: 'boolean', default: true })
-  isActive: boolean;
+  @Column({ nullable: true })
+  image: string;
 
   @ManyToOne(() => UserProfile, (userProfile) => userProfile.foodTrackers, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'user_profile_id' })
   userProfile: UserProfile;
+
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
 }
