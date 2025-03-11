@@ -1,7 +1,7 @@
 import {
     Column,
     CreateDateColumn,
-    Entity, JoinColumn,
+    Entity, JoinColumn, OneToMany,
     OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
@@ -10,6 +10,7 @@ import { SubscriptionType } from '../enums/subscription-type.enum';
 import { UserProfile } from '../../user-profiles/entities/user-profile.entity';
 import { AuthProvider } from '../enums/auth-provider.enum';
 import { Role } from '../../auth/enums/roles.enum';
+import { Payment } from '../../payments/entities/payment.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -27,7 +28,7 @@ export class User {
 
     @Column({ type: 'varchar', length: 50, unique: true, nullable: true })
     auth0Id: string;
-    
+
     @Column({ type: 'varchar', length: 50, nullable: true })
     profilePicture: string;
 
@@ -66,4 +67,10 @@ export class User {
 
     @Column({ type: 'boolean', default: true })
     isActive: boolean;
+
+    @Column({ nullable: true })
+    stripeCustomerId: string;
+
+    @OneToMany(() => Payment, (payment) => payment.user, { nullable: true })
+    payments?: Payment[];
 }

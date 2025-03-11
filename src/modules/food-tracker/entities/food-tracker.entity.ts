@@ -37,4 +37,7 @@ export class FoodTracker {
     })
     @JoinColumn({ name: 'user_profile_id' })
     userProfile: UserProfile;
+
+    @Column({ type: 'boolean', default: true })
+    isActive: boolean;
 }

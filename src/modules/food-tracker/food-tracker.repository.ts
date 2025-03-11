@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FoodTracker } from './entities/food-tracker.entity';
-import { Between, Repository } from 'typeorm';
+import { Between, Repository, UpdateResult } from 'typeorm';
 import { CreateFoodTrackerDto } from './dto/create-food-tracker.dto';
 import { UpdateFoodTrackerDto } from './dto/update-food-tracker.dto';
 import { UserProfile } from '../user-profiles/entities/user-profile.entity';
@@ -97,6 +97,14 @@ export class FoodTrackerRepository {
 
   async delete(foodTracker: FoodTracker): Promise<void> {
     await this.foodTrackerRepository.remove(foodTracker);
+  }
+
+  async deactivate(foodTracker: FoodTracker): Promise<UpdateResult> {
+    const result: UpdateResult = await this.foodTrackerRepository.update(
+      foodTracker.id,
+      { isActive: false },
+    );
+    return result;
   }
 
   async updateFoodTracker(

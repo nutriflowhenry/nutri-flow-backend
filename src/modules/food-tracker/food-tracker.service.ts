@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+    ConflictException,
+    ForbiddenException,
+    Injectable,
+} from '@nestjs/common';
 import { CreateFoodTrackerDto } from './dto/create-food-tracker.dto';
 import { UpdateFoodTrackerDto } from './dto/update-food-tracker.dto';
 import { FoodTrackerRepository } from './food-tracker.repository';
@@ -140,6 +144,22 @@ export class FoodTrackerService {
         };
     }
 
+    async deactivateFoodTracker(foodTrackerId: string, userId: string) {
+        const validateFoodTracker: FoodTracker = await this.validateUpadateDelete(
+            userId,
+            foodTrackerId,
+        );
+        if (!validateFoodTracker.isActive) {
+            throw new ConflictException(
+                'El registro de comida ya se encuentra desactivado',
+            );
+        }
+        await this.foodTrackerRepository.deactivate(validateFoodTracker);
+        return {
+            message: `El registro de foodTracker con id ${validateFoodTracker.id} fue desactivado exitosamente`,
+        };
+    }
+
     async updateFoodTracker(
         foodTrackerId: string,
         userId: string,
@@ -160,12 +180,11 @@ export class FoodTrackerService {
         };
     }
 
-
-    async getImageUploadUrl(foodTrackerId: string, fileType: string): Promise<string> {
-        return this.s3Service.generateUploadUrl(foodTrackerId, 'meal', fileType);
-    }
-
-
+    // async getImageUploadUrl(foodTrackerId: string, fileType: string): Promise<string> {
+    //     return this.s3Service.generateUploadUrl(foodTrackerId, 'meal', fileType);
+    // }
+    //
+    //
     // async updateMealImage(foodTrackerId: string, fileType: string): Promise<void> {
     //     const filePath = `meal-pictures/${foodTrackerId}.${fileType}`;
     //     await this.updateFoodTracker(foodTrackerId, 'userId', { image: filePath });

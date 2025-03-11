@@ -9,6 +9,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '../auth/enums/roles.enum';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import * as bcrypt from 'bcrypt';
+import { SubscriptionType } from './enums/subscription-type.enum';
 
 @Injectable()
 export class UsersRepository {
@@ -90,5 +91,32 @@ export class UsersRepository {
     async checkIfAdminExists(): Promise<boolean> {
         const admin = await this.repository.findOneBy({ role: Role.ADMIN });
         return !!admin;
+    }
+
+
+    async findByStripeId(stripeCustomerId: string): Promise<User> {
+        return await this.repository.findOne({
+            where: { stripeCustomerId },
+        });
+    }
+
+
+    async addStripeId(stripeId: string, userId: string): Promise<User> {
+        await this.repository.update(userId, { stripeCustomerId: stripeId });
+        return this.repository.findOne({ where: { id: userId } });
+    }
+
+
+    async updateSubscriptionType(userId: string): Promise<void> {
+        await this.repository.update(userId, {
+            subscriptionType: SubscriptionType.PREMIUM,
+        });
+    }
+
+
+    async downgradeSubscriptionType(userId: string): Promise<void> {
+        await this.repository.update(userId, {
+            subscriptionType: SubscriptionType.FREE,
+        });
     }
 }

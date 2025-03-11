@@ -98,4 +98,29 @@ export class UsersService {
         const filePath = `profile-pictures/${userId}.${fileType}`;
         await this.update(userId, { profilePicture: filePath });
     }
+
+
+    async findByStripeId(stripeId: string): Promise<User> {
+        const user: User = await this.usersRepository.findByStripeId(stripeId);
+        if (!user)
+            throw new NotFoundException(
+                `El usuario buscado no tiene una cuenta en Stripe`,
+            );
+        return user;
+    }
+
+
+    async addStripeId(stripeId: string, userId: string): Promise<User> {
+        return this.usersRepository.addStripeId(stripeId, userId);
+    }
+
+
+    async updateSubscriptionType(userId: string): Promise<void> {
+        return this.usersRepository.updateSubscriptionType(userId);
+    }
+
+
+    async downgradeSubscriptionType(userId: string): Promise<void> {
+        return this.usersRepository.downgradeSubscriptionType(userId);
+    }
 }
