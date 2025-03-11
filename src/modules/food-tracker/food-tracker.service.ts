@@ -180,9 +180,10 @@ export class FoodTrackerService {
         };
     }
 
-    // async getImageUploadUrl(foodTrackerId: string, fileType: string): Promise<string> {
-    //     return this.s3Service.generateUploadUrl(foodTrackerId, 'meal', fileType);
-    // }
+    async getImageUploadUrl(foodTrackerId: string, fileType: string): Promise<string> {
+        return this.s3Service.generateUploadUrl(foodTrackerId, 'meal', fileType);
+    }
+
     //
     //
     // async updateMealImage(foodTrackerId: string, fileType: string): Promise<void> {
