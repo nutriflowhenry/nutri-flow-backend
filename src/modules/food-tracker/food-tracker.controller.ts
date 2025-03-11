@@ -64,7 +64,7 @@ export class FoodTrackerController {
     @Param('id', ParseUUIDPipe) foodTrackerId: string,
     @Req() req: { user: { sub: string } },
   ) {
-    return this.foodTrackerService.deactivateFoodTracker(
+    return this.foodTrackerService.deleteFoodTracker(
       foodTrackerId,
       req.user.sub,
     );
