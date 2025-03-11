@@ -1,15 +1,13 @@
-import { Type } from 'class-transformer';
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 import { User } from 'src/modules/users/entities/user.entity';
 
 export class CreatePaymentDto {
-  stripeSubscriptionId: string;
+    stripeSubscriptionId: string;
 
-  isActive: boolean;
+    isActive: boolean;
 
-  user: User;
+    user: User;
 
-  currentPeriodStart: Date;
+    currentPeriodStart: Date;
 
-  currentPeriodEnd: Date;
+    currentPeriodEnd: Date;
 }
