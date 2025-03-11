@@ -10,26 +10,30 @@ import { FoodTracker } from './entities/food-tracker.entity';
 import { UserProfilesService } from '../user-profiles/user-profiles.service';
 import { UserProfile } from '../user-profiles/entities/user-profile.entity';
 import { GetFoodTrackerDto } from './dto/get-food-tracker.dto';
+import { S3Service } from '../aws/s3-service';
 
 @Injectable()
 export class FoodTrackerService {
   constructor(
     private readonly foodTrackerRepository: FoodTrackerRepository,
-    private readonly usersProfileServise: UserProfilesService,
+    private readonly userProfilesService: UserProfilesService,
+    private readonly s3Service: S3Service,
   ) {}
 
   async createFoodTracker(
     foodTrackerData: CreateFoodTrackerDto,
     userId: string,
+    date?: string,
   ) {
     try {
       const validateUserProfile: UserProfile = (
-        await this.usersProfileServise.findOneByUserId(userId)
+        await this.userProfilesService.findOneByUserId(userId)
       ).userProfile;
       const foodTracker: FoodTracker =
         await this.foodTrackerRepository.createFoodTracker(
           foodTrackerData,
           validateUserProfile,
+          date,
         );
 
       const { userProfile, ...sanitizedFoodTracker } = foodTracker;
@@ -47,7 +51,7 @@ export class FoodTrackerService {
 
   async getDailyCalories(userId: string, date?: string) {
     const validateUserProfile: UserProfile = (
-      await this.usersProfileServise.findOneByUserId(userId)
+      await this.userProfilesService.findOneByUserId(userId)
     ).userProfile;
     const today: string = date || new Date().toISOString();
     const dailyFoodTracker: FoodTracker[] =
@@ -73,7 +77,7 @@ export class FoodTrackerService {
     const limit: number = getFoodTrackerData.limit || 10;
     const page: number = getFoodTrackerData.page || 1;
     const validateUserProfile: UserProfile = (
-      await this.usersProfileServise.findOneByUserId(userId)
+      await this.userProfilesService.findOneByUserId(userId)
     ).userProfile;
     const dailyFoodTracker =
       await this.foodTrackerRepository.getDailyFooodTracker(
@@ -114,7 +118,7 @@ export class FoodTrackerService {
     foodTrackerId: string,
   ): Promise<FoodTracker> {
     const validUserProfile: UserProfile = (
-      await this.usersProfileServise.findOneByUserId(userId)
+      await this.userProfilesService.findOneByUserId(userId)
     ).userProfile;
     const allFoodTracker: FoodTracker[] =
       await this.getAllFoodTrackerByUser(validUserProfile);
@@ -177,4 +181,18 @@ export class FoodTrackerService {
       updatedFoodTracker,
     };
   }
+
+  async getImageUploadUrl(
+    foodTrackerId: string,
+    fileType: string,
+  ): Promise<string> {
+    return this.s3Service.generateUploadUrl(foodTrackerId, 'meal', fileType);
+  }
+
+  //
+  //
+  // async updateMealImage(foodTrackerId: string, fileType: string): Promise<void> {
+  //     const filePath = `meal-pictures/${foodTrackerId}.${fileType}`;
+  //     await this.updateFoodTracker(foodTrackerId, 'userId', { image: filePath });
+  // }
 }
