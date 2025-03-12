@@ -21,4 +21,15 @@ export class S3Service {
 
         return await getSignedUrl(this.s3, command, { expiresIn: 900 });
     }
+
+    async uploadFile(key: string, body: Buffer, contentType: string): Promise<void> {
+        const command = new PutObjectCommand({
+            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Key: key,
+            Body: body,
+            ContentType: contentType,
+        });
+
+        await this.s3.send(command);
+    }
 }
