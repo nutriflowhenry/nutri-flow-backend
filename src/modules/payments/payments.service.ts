@@ -125,7 +125,7 @@ export class PaymentsService {
         currentPeriodStart: new Date(paymentData.current_period_start * 1000),
         currentPeriodEnd: new Date(paymentData.current_period_end * 1000),
       };
-      await this.paymentRepository.create(createPaymentData);
+      return await this.paymentRepository.create(createPaymentData);
     }
   }
 
@@ -133,7 +133,10 @@ export class PaymentsService {
     const payment: Payment | null =
       await this.paymentRepository.findOneByStripeId(paymentData.id);
     if (!payment) {
-      await this.registerPayment(paymentData);
+      const registerPayment: Payment = await this.registerPayment(paymentData);
+      if (registerPayment.status === SubscriptionStatus.ACTIVE) {
+        await this.userService.updateSubscriptionType(registerPayment.user.id);
+      }
     } else if (payment) {
       const stripeCustomerId: string = paymentData.customer.toString();
       const user: User =
