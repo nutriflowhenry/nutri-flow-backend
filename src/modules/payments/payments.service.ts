@@ -130,6 +130,7 @@ export class PaymentsService {
   }
 
   async updatePayment(paymentData: Stripe.Subscription) {
+    console.log(paymentData);
     const payment: Payment | null =
       await this.paymentRepository.findOneByStripeId(paymentData.id);
     console.log(payment);
