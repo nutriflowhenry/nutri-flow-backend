@@ -25,5 +25,4 @@ export class ImagesController {
         @Query('fileType') fileType: string,): Promise<string> {
         return this.foodTrackerService.getImageUploadUrl(foodTrackerId, fileType);
     }
-
 }

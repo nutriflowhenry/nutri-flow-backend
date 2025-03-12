@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { S3Service } from '../aws/s3-service';
 import { CloudFrontService } from '../aws/cloud-front.service';
+import axios from 'axios';
 
 @Injectable()
 export class UsersService {
@@ -97,6 +98,25 @@ export class UsersService {
     async updateProfilePicture(userId: string, fileType: string): Promise<void> {
         const filePath = `profile-pictures/${userId}.${fileType}`;
         await this.update(userId, { profilePicture: filePath });
+    }
+
+
+    async uploadGoogleProfilePicture(userId: string, googleImageUrl: string): Promise<string> {
+        try {
+            const response = await axios.get(googleImageUrl, { responseType: 'arraybuffer' });
+            const imageBuffer = Buffer.from(response.data);
+            const fileType = 'jpg'; // Default to jpg, could be dynamic
+            const filePath = `profile-pictures/${userId}.${fileType}`;
+
+            await this.s3Service.uploadFile(filePath, imageBuffer, `image/${fileType}`);
+
+            await this.update(userId, { profilePicture: filePath }); // Update DB
+            return filePath;
+            
+        } catch (error) {
+            console.error('Failed to upload Google profile picture:', error);
+            return null;
+        }
     }
 
 

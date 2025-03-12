@@ -7,103 +7,112 @@ import { plainToInstance } from 'class-transformer';
 import { PublicUserDto } from '../users/dto/public-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { OAuth2Client } from 'google-auth-library';
+import { UsersService } from '../users/users.service';
 
 
 @Injectable()
 export class AuthService {
-   private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-   constructor(
-      private usersRepository: UsersRepository,
-      private jwtService: JwtService) {
-   }
+    constructor(
+        private readonly usersService: UsersService,
+        private readonly usersRepository: UsersRepository,
+        private readonly jwtService: JwtService) {
+    }
 
-   async signUp(userData: CreateLocalUserDto): Promise<PublicUserDto> {
-      const dbUser = await this.usersRepository.findByEmail(userData.email);
-      if (dbUser) throw new BadRequestException('Email already exists');
+    async signUp(userData: CreateLocalUserDto): Promise<PublicUserDto> {
+        const dbUser = await this.usersRepository.findByEmail(userData.email);
+        if (dbUser) throw new BadRequestException('Email already exists');
 
-      const { passwordConfirmation, ...filteredData } = userData;
+        const { passwordConfirmation, ...filteredData } = userData;
 
-      const newUser = this.usersRepository.createLocalUser({
-         ...filteredData,
-         password: await bcrypt.hash(userData.password, 10)
-      });
+        const newUser = this.usersRepository.createLocalUser({
+            ...filteredData,
+            password: await bcrypt.hash(userData.password, 10)
+        });
 
-      return plainToInstance(PublicUserDto, newUser);
-   }
-
-
-   async logIn(credentials: LoginUserDto) {
-      const user = await this.usersRepository.findByEmail(credentials.email);
-      if (!user) throw new BadRequestException('Invalid credentials');
-
-      const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
-      if (!isPasswordValid) throw new BadRequestException('Invalid credentials');
-
-      const userPayload = {
-         sub: user.id,
-         name: user.name,
-         email: user.email,
-         role: user.role,
-      };
-
-      console.log({ userPayload });
-
-      const jwt = this.jwtService.sign(userPayload);
-
-      return {
-         token: jwt,
-         userId: userPayload.sub,
-         userName: userPayload.name,
-         email: userPayload.email,
-      };
-   }
+        return plainToInstance(PublicUserDto, newUser);
+    }
 
 
-   async authenticateWithGoogle(token: string) {
-      const googleUser = await this.verifyGoogleToken(token);
-      if (!googleUser) throw new UnauthorizedException('Google authentication failed');
+    async logIn(credentials: LoginUserDto) {
+        const user = await this.usersRepository.findByEmail(credentials.email);
+        if (!user) throw new BadRequestException('Invalid credentials');
 
-      let user = await this.usersRepository.findByEmail(googleUser.email);
-      if (!user) {
-         user = await this.usersRepository.createAuth0User({
-            name: googleUser.given_name,
-            email: googleUser.email,
-            auth0Id: googleUser.sub
-         });
-      }
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        if (!isPasswordValid) throw new BadRequestException('Invalid credentials');
 
-      const payload = {
-         sub: user.id,
-         name: user.name,
-         email: user.email,
-         role: user.role
-      };
+        const userPayload = {
+            sub: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+        };
 
-      console.log({ payload });
+        console.log({ userPayload });
 
-      const jwt = this.jwtService.sign(payload);
+        const jwt = this.jwtService.sign(userPayload);
 
-      return {
-         token: jwt,
-         userId: payload.sub,
-         userName: payload.name,
-         email: payload.email,
-      };
-   }
+        return {
+            token: jwt,
+            userId: userPayload.sub,
+            userName: userPayload.name,
+            email: userPayload.email,
+        };
+    }
 
 
-   async verifyGoogleToken(token: string) {
-      try {
-         const ticket = await this.client.verifyIdToken({
-            idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID,
-         });
+    async authenticateWithGoogle(token: string) {
+        const googleUser = await this.verifyGoogleToken(token);
+        if (!googleUser) throw new UnauthorizedException('Google authentication failed');
 
-         return ticket.getPayload();
+        let user = await this.usersRepository.findByEmail(googleUser.email);
+        if (!user) {
+            let profilePicturePath = null;
 
-      } catch (error) {
-         throw new UnauthorizedException('Invalid Google Token');
-      }
-   }
+            if (googleUser.picture) {
+                profilePicturePath = await this.usersService.uploadGoogleProfilePicture(user.id, googleUser.picture);
+            }
+
+            user = await this.usersRepository.createAuth0User({
+                name: googleUser.given_name,
+                email: googleUser.email,
+                auth0Id: googleUser.sub,
+                profilePicture: profilePicturePath,
+            });
+        }
+
+        const payload = {
+            sub: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        };
+
+        console.log({ payload });
+
+        const jwt = this.jwtService.sign(payload);
+
+        return {
+            token: jwt,
+            userId: payload.sub,
+            userName: payload.name,
+            email: payload.email,
+        };
+    }
+
+
+    async verifyGoogleToken(token: string) {
+        try {
+            const ticket = await this.client.verifyIdToken({
+                idToken: token,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+
+            return ticket.getPayload();
+
+        } catch (error) {
+            throw new UnauthorizedException('Invalid Google Token');
+        }
+    }
 }
