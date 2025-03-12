@@ -66,6 +66,8 @@ export class PaymentRepository {
           'user.subscriptionType',
           'user.isActive',
         ])
+        .orderBy('payment.created_at', 'DESC')
+        .addOrderBy('payment.id', 'ASC')
         .skip(skip)
         .take(limit)
         .getManyAndCount();
