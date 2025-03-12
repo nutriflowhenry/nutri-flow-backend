@@ -129,44 +129,49 @@ export class PaymentsService {
     }
   }
 
-  // async updatePayment(paymentData: Stripe.Subscription, previousData) {
-  //   const payment: Payment | null =
-  //     await this.paymentRepository.findOneByStripeId(paymentData.id);
+  async updatePayment(paymentData: Stripe.Subscription) {
+    const payment: Payment | null =
+      await this.paymentRepository.findOneByStripeId(paymentData.id);
 
-  //   if (payment)
-  //     if (!payment && paymentData.status === 'active') {
-  //       const stripeCustomerId: string =
-  //         typeof paymentData.customer === 'string'
-  //           ? paymentData.customer
-  //           : paymentData.customer.id;
-  //       const user: User =
-  //         await this.userService.findByStripeId(stripeCustomerId);
-  //       const createPaymentData: CreatePaymentDto = {
-  //         isActive: true,
-  //         stripeSubscriptionId: paymentData.id,
-  //         user,
-  //         currentPeriodStart: new Date(paymentData.current_period_start * 1000),
-  //         currentPeriodEnd: new Date(paymentData.current_period_end * 1000),
-  //       };
-  //       await this.paymentRepository.create(createPaymentData);
-  //       await this.userService.updateSubscriptionType(user.id);
-  //     } else if (payment) {
-  //       const newStatus: boolean =
-  //         paymentData.status !== 'active' ? false : true;
-  //       await this.paymentRepository.update(payment.id, {
-  //         isActive: newStatus,
-  //       });
-  //       if (!newStatus) {
-  //         const stripeCustomerId: string =
-  //           typeof paymentData.customer === 'string'
-  //             ? paymentData.customer
-  //             : paymentData.customer.id;
-  //         const user: User =
-  //           await this.userService.findByStripeId(stripeCustomerId);
-  //         this.userService.downgradeSubscriptionType(user.id);
-  //       }
-  //     }
-  // }
+    if (!payment) return;
+    if (payment) {
+      const stripeCustomerId: string = paymentData.customer.toString();
+      const user: User =
+        await this.userService.findByStripeId(stripeCustomerId);
+      const isAvalidateStatus: boolean = Object.keys(
+        SubscriptionStatus,
+      ).includes(paymentData.status.toUpperCase());
+      let statusEnum: SubscriptionStatus;
+      if (isAvalidateStatus) {
+        const statusString: string =
+          paymentData.status.toUpperCase() as keyof typeof SubscriptionStatus;
+        statusEnum = SubscriptionStatus[statusString];
+      } else {
+        statusEnum = SubscriptionStatus.UNEXPECTED;
+      }
+      const updateData: UpdatePaymentDto = {
+        status: SubscriptionStatus.ACTIVE,
+        currentPeriodStart: new Date(paymentData.current_period_start * 1000),
+        currentPeriodEnd: new Date(paymentData.current_period_end * 1000),
+      };
+      await this.paymentRepository.update(payment.id, updateData);
+      await this.userService.updateSubscriptionType(user.id);
+      // } else if (payment) {
+      //   const newStatus: boolean = paymentData.status !== 'active' ? false : true;
+      //   await this.paymentRepository.update(payment.id, {
+      //     isActive: newStatus,
+      //   });
+      //   if (!newStatus) {
+      //     const stripeCustomerId: string =
+      //       typeof paymentData.customer === 'string'
+      //         ? paymentData.customer
+      //         : paymentData.customer.id;
+      //     const user: User =
+      //       await this.userService.findByStripeId(stripeCustomerId);
+      //     this.userService.downgradeSubscriptionType(user.id);
+      //   }
+    }
+  }
 
   async subscriptiondowngrade(paymentData: Stripe.Subscription) {
     if (!paymentData.id) return;

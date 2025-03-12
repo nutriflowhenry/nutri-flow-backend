@@ -22,10 +22,10 @@ export class StripeController {
         await this.paymentService.registerPayment(event.data.object);
         break;
       }
-      // case 'customer.subscription.updated': {
-      //   await this.paymentService.updatePayment(event.data.object, event.data);
-      //   break;
-      // }
+      case 'customer.subscription.updated': {
+        await this.paymentService.updatePayment(event.data.object);
+        break;
+      }
       case 'customer.subscription.deleted': {
         await this.paymentService.subscriptiondowngrade(event.data.object);
         break;
