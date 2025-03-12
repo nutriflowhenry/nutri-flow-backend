@@ -101,9 +101,9 @@ export class PaymentsService {
   }
 
   async registerPayment(paymentData: Stripe.Subscription) {
-    const payment: Payment | null =
+    const localRegisterPayment: Payment | null =
       await this.paymentRepository.findOneByStripeId(paymentData.id);
-    if (!payment) {
+    if (!localRegisterPayment) {
       const stripeCustomerId: string = paymentData.customer.toString();
       const user: User =
         await this.userService.findByStripeId(stripeCustomerId);
@@ -130,12 +130,11 @@ export class PaymentsService {
   }
 
   async updatePayment(paymentData: Stripe.Subscription) {
-    console.log(paymentData);
     const payment: Payment | null =
       await this.paymentRepository.findOneByStripeId(paymentData.id);
-    console.log(payment);
-    if (!payment) return;
-    if (payment) {
+    if (!payment) {
+      await this.registerPayment(paymentData);
+    } else if (payment) {
       const stripeCustomerId: string = paymentData.customer.toString();
       const user: User =
         await this.userService.findByStripeId(stripeCustomerId);
