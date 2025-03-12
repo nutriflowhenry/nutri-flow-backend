@@ -16,23 +16,20 @@ import { CreateFoodTrackerDto } from './dto/create-food-tracker.dto';
 import { UpdateFoodTrackerDto } from './dto/update-food-tracker.dto';
 import { GetFoodTrackerDto } from './dto/get-food-tracker.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { CreateDailyFoodTrackerDto } from './dto/create-daily-food-tracker.dto';
 
 @Controller('food-tracker')
 export class FoodTrackerController {
   constructor(private readonly foodTrackerService: FoodTrackerService) {}
 
   @UseGuards(AuthGuard)
-  @Post('create/:date')
+  @Post('create')
   async createFoodTracker(
     @Req() req: { user: { sub: string } },
     @Body() foodTrackeData: CreateFoodTrackerDto,
-    @Param() paramDate?: CreateDailyFoodTrackerDto,
   ) {
     return await this.foodTrackerService.createFoodTracker(
       foodTrackeData,
       req.user.sub,
-      paramDate?.date,
     );
   }
 

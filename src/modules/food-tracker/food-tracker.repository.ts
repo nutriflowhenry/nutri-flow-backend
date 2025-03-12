@@ -17,12 +17,13 @@ export class FoodTrackerRepository {
   async createFoodTracker(
     foodTrackerData: CreateFoodTrackerDto,
     userProfile: UserProfile,
-    date?: string,
   ): Promise<FoodTracker> {
+    foodTrackerData.createdAt = foodTrackerData.createdAt
+      ? foodTrackerData.createdAt
+      : new Date().toISOString();
     const foodTracker: FoodTracker = this.foodTrackerRepository.create({
       ...foodTrackerData,
       userProfile,
-      createdAt: date,
     });
     return await this.foodTrackerRepository.save(foodTracker);
   }

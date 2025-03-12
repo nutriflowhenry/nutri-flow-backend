@@ -23,7 +23,6 @@ export class FoodTrackerService {
   async createFoodTracker(
     foodTrackerData: CreateFoodTrackerDto,
     userId: string,
-    date?: string,
   ) {
     try {
       const validateUserProfile: UserProfile = (
@@ -33,7 +32,6 @@ export class FoodTrackerService {
         await this.foodTrackerRepository.createFoodTracker(
           foodTrackerData,
           validateUserProfile,
-          date,
         );
 
       const { userProfile, ...sanitizedFoodTracker } = foodTracker;
