@@ -132,7 +132,7 @@ export class PaymentsService {
   async updatePayment(paymentData: Stripe.Subscription) {
     const payment: Payment | null =
       await this.paymentRepository.findOneByStripeId(paymentData.id);
-
+    console.log(payment);
     if (!payment) return;
     if (payment) {
       const stripeCustomerId: string = paymentData.customer.toString();
