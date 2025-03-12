@@ -83,4 +83,14 @@ export class UsersController {
     banUser(@Param('id') id: string): Promise<void> {
         return this.usersService.banUser(id);
     }
+
+
+    @Put(':userId/profile-picture')
+    async updateProfilePicture(
+        @Param('userId') userId: string,
+        @Body('fileType') fileType: string,
+    ) {
+        await this.usersService.updateProfilePicture(userId, fileType);
+        return { message: 'Profile picture updated successfully' };
+    }
 }
