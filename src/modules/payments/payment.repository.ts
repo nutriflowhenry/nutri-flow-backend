@@ -4,6 +4,7 @@ import { Payment } from './entities/payment.entity';
 import { Repository } from 'typeorm';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { SubscriptionStatus } from './enums/suscriptionStatus.enum';
 
 @Injectable()
 export class PaymentRepository {
@@ -30,7 +31,7 @@ export class PaymentRepository {
     return await this.PaymentRepository.findOne({
       where: {
         user: { id: userId },
-        isActive: true,
+        status: SubscriptionStatus.ACTIVE,
       },
     });
   }
@@ -52,5 +53,22 @@ export class PaymentRepository {
       results,
       total,
     };
+  }
+
+  async findAll(skip: number, limit: number): Promise<[Payment[], number]> {
+    const result: [Payment[], number] =
+      await this.PaymentRepository.createQueryBuilder('payment')
+        .leftJoinAndSelect('payment.user', 'user')
+        .select([
+          'payment',
+          'user.id',
+          'user.name',
+          'user.subscriptionType',
+          'user.isActive',
+        ])
+        .skip(skip)
+        .take(limit)
+        .getManyAndCount();
+    return result;
   }
 }

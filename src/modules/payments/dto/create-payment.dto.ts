@@ -1,11 +1,12 @@
 import { Type } from 'class-transformer';
 import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 import { User } from 'src/modules/users/entities/user.entity';
+import { SubscriptionStatus } from '../enums/suscriptionStatus.enum';
 
 export class CreatePaymentDto {
   stripeSubscriptionId: string;
 
-  isActive: boolean;
+  status: SubscriptionStatus;
 
   user: User;
 
