@@ -18,6 +18,9 @@ export class FoodTrackerRepository {
     foodTrackerData: CreateFoodTrackerDto,
     userProfile: UserProfile,
   ): Promise<FoodTracker> {
+    foodTrackerData.createdAt = foodTrackerData.createdAt
+      ? foodTrackerData.createdAt
+      : new Date().toISOString();
     const foodTracker: FoodTracker = this.foodTrackerRepository.create({
       ...foodTrackerData,
       userProfile,

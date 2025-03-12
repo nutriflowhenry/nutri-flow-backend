@@ -1,75 +1,76 @@
 import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+    Column,
+    CreateDateColumn,
+    Entity, JoinColumn, OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
 } from 'typeorm';
 import { SubscriptionType } from '../enums/subscription-type.enum';
 import { UserProfile } from '../../user-profiles/entities/user-profile.entity';
 import { AuthProvider } from '../enums/auth-provider.enum';
 import { Role } from '../../auth/enums/roles.enum';
-import { Payment } from 'src/modules/payments/entities/payment.entity';
+import { Payment } from '../../payments/entities/payment.entity';
 
 @Entity({ name: 'users' })
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-  @Column({ type: 'varchar', length: 30, nullable: false })
-  name: string;
+    @Column({ type: 'varchar', length: 30, nullable: false })
+    name: string;
 
-  @Column({ type: 'varchar', length: 40, unique: true, nullable: false })
-  email: string;
+    @Column({ type: 'varchar', length: 40, unique: true, nullable: false })
+    email: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  password: string;
+    @Column({ type: 'varchar', length: 100, nullable: true })
+    password: string;
 
-  @Column({ type: 'varchar', length: 50, unique: true, nullable: true })
-  auth0Id: string;
+    @Column({ type: 'varchar', length: 50, unique: true, nullable: true })
+    auth0Id: string;
 
-  @Column({
-    type: 'enum',
-    enum: AuthProvider,
-    default: AuthProvider.LOCAL,
-  })
-  provider: AuthProvider;
+    @Column({ type: 'varchar', length: 50, nullable: true })
+    profilePicture: string;
 
-  @OneToOne(() => UserProfile, (profile) => profile.user)
-  @JoinColumn({ name: 'userProfileId' })
-  userProfile: UserProfile;
+    @Column({
+        type: 'enum',
+        enum: AuthProvider,
+        default: AuthProvider.LOCAL,
+    })
+    provider: AuthProvider;
 
-  // @OneToMany(() => BlogPost, post => post.author)
-  // blogPosts: BlogPost[]
-  //
-  // @OneToMany(() => Comment, comment => comment.author)
-  // comments: Comment[];
+    @OneToOne(() => UserProfile, (profile) => profile.user)
+    @JoinColumn({ name: 'userProfileId' })
+    userProfile: UserProfile;
 
-  @Column({ type: 'enum', enum: Role, default: Role.USER })
-  role: Role;
+    // @OneToMany(() => BlogPost, post => post.author)
+    // blogPosts: BlogPost[]
+    //
+    // @OneToMany(() => Comment, comment => comment.author)
+    // comments: Comment[];
 
-  @Column({
-    type: 'enum',
-    enum: SubscriptionType,
-    default: SubscriptionType.FREE,
-  })
-  subscriptionType: SubscriptionType;
+    @Column({ type: 'enum', enum: Role, default: Role.USER })
+    role: Role;
 
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt: Date;
+    @Column({
+        type: 'enum',
+        enum: SubscriptionType,
+        default: SubscriptionType.FREE,
+    })
+    subscriptionType: SubscriptionType;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
-  updatedAt: Date;
+    @CreateDateColumn({ type: 'timestamptz' })
+    createdAt: Date;
 
-  @Column({ type: 'boolean', default: true })
-  isActive: boolean;
+    @UpdateDateColumn({ type: 'timestamptz' })
+    updatedAt: Date;
 
-  @Column({ nullable: true })
-  stripeCustomerId: string;
+    @Column({ type: 'boolean', default: true })
+    isActive: boolean;
 
-  @OneToMany(() => Payment, (payment) => payment.user, { nullable: true })
-  payments?: Payment[];
+    @Column({ nullable: true })
+    stripeCustomerId: string;
+
+    @OneToMany(() => Payment, (payment) => payment.user, { nullable: true })
+    payments?: Payment[];
 }

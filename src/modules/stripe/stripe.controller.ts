@@ -36,34 +36,10 @@ export class StripeController {
         );
         break;
       }
-      // case 'customer.subscription.created': {
-      //   const subscription = event.data.object as Stripe.Subscription;
-
-      //   // Verificar si ya existe en tu DB (idempotencia)
-      //   const exists = await this.subscriptionRepo.findOneBy({
-      //     stripeSubscriptionId: subscription.id
-      //   });
-
-      //   if (!exists) {
-      //     await this.subscriptionRepo.save({
-      //       stripeSubscriptionId: subscription.id,
-      //       status: subscription.status,
-      //       user: await this.getUserFromCustomerId(subscription.customer),
-      //       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      //     });
-
-      //     // Enviar email de bienvenida
-      //     this.emailService.sendSubscriptionConfirmation(
-      //       subscription.customer.toString()
-      //     );
-      //   }
-      //   break;
-      // }
       default: {
         console.log(`Evento del tipo ${event.type}, no manejado`);
       }
     }
-
     return { received: true };
   }
 }

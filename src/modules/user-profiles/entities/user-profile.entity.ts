@@ -1,9 +1,9 @@
 import {
-  Column,
-  Entity,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
+    Column,
+    Entity,
+    OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Gender } from '../enums/gender.enum';
@@ -15,36 +15,37 @@ import { WaterTracker } from 'src/modules/water-tracker/entities/water-tracker.e
 
 @Entity()
 export class UserProfile {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-  @OneToOne(() => User, (user) => user.userProfile, { onDelete: 'CASCADE' })
-  user: User;
 
-  @OneToMany(() => WaterTracker, (waterTracker) => waterTracker.userProfile)
-  waterTrackers: WaterTracker[];
+    @OneToOne(() => User, (user) => user.userProfile, { onDelete: 'CASCADE' })
+    user: User;
 
-  @OneToMany(() => FoodTracker, (foodTracker) => foodTracker.userProfile)
-  foodTrackers: FoodTracker[];
+    @OneToMany(() => WaterTracker, (waterTracker) => waterTracker.userProfile)
+    waterTrackers: WaterTracker[];
 
-  @Column({ type: 'date', nullable: false })
-  birthdate: Date;
+    @OneToMany(() => FoodTracker, (foodTracker) => foodTracker.userProfile)
+    foodTrackers: FoodTracker[];
 
-  @Column({ type: 'enum', enum: Gender })
-  gender: string;
+    @Column({ type: 'date', nullable: false })
+    birthdate: Date;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: false })
-  weight: number;
+    @Column({ type: 'enum', enum: Gender })
+    gender: string;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: false })
-  height: number;
+    @Column({ type: 'decimal', precision: 5, scale: 2, nullable: false })
+    weight: number;
 
-  // @Column({ type: 'enum', enum: ActivityLevel, nullable: false })
-  // activityLevel: ActivityLevel;
+    @Column({ type: 'decimal', precision: 5, scale: 2, nullable: false })
+    height: number;
 
-  // @Column({ type: 'enum', enum: Goal, nullable: false })
-  // goal: Goal;
+    // @Column({ type: 'enum', enum: ActivityLevel, nullable: false })
+    // activityLevel: ActivityLevel;
 
-  // @Column({ type: 'enum', enum: DietType, default: DietType.NONE })
-  // dietType: string;
+    // @Column({ type: 'enum', enum: Goal, nullable: false })
+    // goal: Goal;
+
+    // @Column({ type: 'enum', enum: DietType, default: DietType.NONE })
+    // dietType: string;
 }

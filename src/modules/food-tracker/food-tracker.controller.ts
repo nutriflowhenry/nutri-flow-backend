@@ -39,7 +39,6 @@ export class FoodTrackerController {
     @Query() queryDate: GetFoodTrackerDto,
     @Req() req: { user: { sub: string } },
   ) {
-    console.log('ho');
     return await this.foodTrackerService.getDailyCalories(
       req.user.sub,
       queryDate?.date,
@@ -64,7 +63,7 @@ export class FoodTrackerController {
     @Param('id', ParseUUIDPipe) foodTrackerId: string,
     @Req() req: { user: { sub: string } },
   ) {
-    return this.foodTrackerService.deactivateFoodTracker(
+    return this.foodTrackerService.deleteFoodTracker(
       foodTrackerId,
       req.user.sub,
     );

@@ -1,4 +1,5 @@
 import {
+  IsISO8601,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -34,4 +35,18 @@ export class CreateFoodTrackerDto {
   @IsString({ message: 'El atributo "\description"\ debe ser de tipo string' })
   @IsOptional()
   description: string;
+
+  @IsISO8601(
+    {},
+    {
+      message:
+        'El atributo "\date\" debe tener como valor una feche con formato: YYYY-MM-DDTHH:mm:ss.sssZ o YYYY-MM-DD',
+    },
+  )
+  @IsOptional()
+  createdAt?: string;
+
+  @IsOptional()
+  @IsString()
+  image: string;
 }
