@@ -129,11 +129,6 @@ export class PaymentsService {
       };
       const registeredPayment: Payment =
         await this.paymentRepository.create(createPaymentData);
-      this.typedEventEmitter.emit('premium.subscription.congrats', {
-        email: user.email,
-        name: user.name,
-        subscription: registeredPayment,
-      });
       return registeredPayment;
     }
   }
@@ -145,6 +140,14 @@ export class PaymentsService {
       const registerPayment: Payment = await this.registerPayment(paymentData);
       if (registerPayment.status === SubscriptionStatus.ACTIVE) {
         await this.userService.updateSubscriptionType(registerPayment.user.id);
+        const user: User = await this.userService.findById(
+          registerPayment.user.id,
+        );
+        this.typedEventEmitter.emit('premium.subscription.congrats', {
+          email: user.email,
+          name: user.name,
+          subscription: registerPayment,
+        });
       }
     } else if (payment) {
       const stripeCustomerId: string = paymentData.customer.toString();
