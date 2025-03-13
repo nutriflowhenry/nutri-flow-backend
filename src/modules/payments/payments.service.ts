@@ -9,6 +9,7 @@ import { Payment } from './entities/payment.entity';
 import { GetPaymentDto } from './dto/get-payment.dto';
 import { SubscriptionStatus } from './enums/suscriptionStatus.enum';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { TypedEventEmitter } from '../emitters/typed-event-emitter.class';
 
 @Injectable()
 export class PaymentsService {
@@ -16,6 +17,7 @@ export class PaymentsService {
     private readonly stripeService: StripeService,
     private readonly userService: UsersService,
     private readonly paymentRepository: PaymentRepository,
+    private readonly typedEventEmitter: TypedEventEmitter,
   ) {}
   async createCheckoutSession(userId: string) {
     const user: User = await this.userService.findById(userId);
@@ -125,7 +127,14 @@ export class PaymentsService {
         currentPeriodStart: new Date(paymentData.current_period_start * 1000),
         currentPeriodEnd: new Date(paymentData.current_period_end * 1000),
       };
-      return await this.paymentRepository.create(createPaymentData);
+      const registeredPayment: Payment =
+        await this.paymentRepository.create(createPaymentData);
+      this.typedEventEmitter.emit('premium.subscription.congrats', {
+        email: user.email,
+        name: user.name,
+        subscription: registeredPayment,
+      });
+      return registeredPayment;
     }
   }
 

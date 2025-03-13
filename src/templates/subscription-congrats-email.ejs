@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>¡Felicidades por tu Suscripción Premium!</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: rgb(255, 246, 234);
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    h1 {
+      color: #4CAF50;
+      text-align: center;
+    }
+    h2 {
+      font-size: 20px;
+      color: #333;
+      margin-top: 20px;
+    }
+    p {
+      font-size: 16px;
+      color: #555;
+      line-height: 1.5;
+    }
+    .subscription-details {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .subscription-details th, .subscription-details td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    .subscription-details th {
+      background-color: #f2f2f2;
+    }
+    .chatbot-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    .chatbot-btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>¡Felicidades, <%= name %>!</h1>
+    <p>
+      Has adquirido la <strong>Suscripción Premium</strong> de <strong>Nutriflow</strong> y ahora cuentas con acceso exclusivo a nuestro chatbot, entre muchas otras ventajas diseñadas para optimizar tu bienestar y nutrición.
+    </p>
+    
+    <h2>Detalles de tu suscripción</h2>
+    <table class="subscription-details">
+      <tr>
+        <th>Fecha de Creación</th>
+        <th>Tipo</th>
+        <th>Inicio de Facturación Actual</th>
+        <th>Fin de Facturación Actual</th>
+      </tr>
+      <tr>
+        <td><%=  created_at %></td>
+        <td>Premium</td>
+        <td><%= currentPeriodStart %></td>
+        <td><%= currentPeriodEnd %></td>
+      </tr>
+    </table>
+    
+    <p>
+      Disfruta de todos los beneficios que esta suscripción premium te ofrece.</p>
+
+    <p style="margin-top: 20px;">
+      ¡Gracias por confiar en Nutriflow<br>
+      Saludos cordiales,<br>
+      Equipo de <strong>Nutriflow</strong>
+    </p>
+  </div>
+</body>
+</html>
