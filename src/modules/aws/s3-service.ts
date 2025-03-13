@@ -11,7 +11,7 @@ export class S3Service {
     async generateUploadUrl(
         id: string, type: 'profile' | 'meal', fileType: string): Promise<string> {
 
-        const filePath = `${type}-pictures/${id}/${fileType}`;
+        const filePath = `${type}-pictures/${id}.${fileType}`;
 
         const command = new PutObjectCommand({
             Bucket: process.env.AWS_S3_BUCKET_NAME,
