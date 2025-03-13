@@ -112,7 +112,7 @@ export class UsersService {
 
             await this.update(userId, { profilePicture: filePath }); // Update DB
             return filePath;
-            
+
         } catch (error) {
             console.error('Failed to upload Google profile picture:', error);
             return null;
