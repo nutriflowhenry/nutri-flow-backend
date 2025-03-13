@@ -193,6 +193,7 @@ export class PaymentsService {
     const payment: Payment = await this.paymentRepository.findOneByStripeId(
       paymentData.id,
     );
+    console.log(payment);
     if (!payment) return;
     await this.paymentRepository.update(payment.id, {
       status: SubscriptionStatus.CANCELED,
