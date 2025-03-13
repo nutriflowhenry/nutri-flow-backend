@@ -50,7 +50,7 @@ export class EmailService {
     try {
       const templatePath = path.join(
         __dirname,
-        '../../templates/welcome-email.ejs',
+        '../../templates/subscription-congrats-email.ejs',
       );
       const template = fs.readFileSync(templatePath, 'utf8');
       const html = ejs.render(template, {
@@ -62,7 +62,7 @@ export class EmailService {
       await this.transporter.sendMail({
         from: '"Nutriflow" <nutriflow@gmail.com>',
         to: email,
-        subject: `Bienvenido a Nutriflow ${name}`,
+        subject: `Felicidades por adquirir tu suscripción premium ${name}`,
         html,
       });
       console.log('Email enviado exitosamente');
