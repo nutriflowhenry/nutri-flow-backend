@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { UsersRepository } from '../users/users.repository';
 import { JwtService } from '@nestjs/jwt';
 import { CreateLocalUserDto } from '../users/dto/create-local-user.dto';
@@ -9,7 +13,7 @@ import { LoginUserDto } from '../users/dto/login-user.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { UsersService } from '../users/users.service';
 import { CloudFrontService } from '../aws/cloud-front.service';
-
+import { TypedEventEmitter } from '../emitters/typed-event-emitter.class';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +23,9 @@ export class AuthService {
         private readonly cloudFrontService: CloudFrontService,
         private readonly usersRepository: UsersRepository,
         private readonly usersService: UsersService,
-        private readonly jwtService: JwtService) {
+        private readonly jwtService: JwtService,
+        private readonly eventEmitter: TypedEventEmitter,
+    ) {
     }
 
     async signUp(userData: CreateLocalUserDto): Promise<PublicUserDto> {
@@ -30,22 +36,31 @@ export class AuthService {
 
         const newUser = this.usersRepository.createLocalUser({
             ...filteredData,
-            password: await bcrypt.hash(userData.password, 10)
+            password: await bcrypt.hash(userData.password, 10),
+        });
+
+        this.eventEmitter.emit('user.welcome', {
+            name: (await newUser).name,
+            email: (await newUser).email,
         });
 
         return plainToInstance(PublicUserDto, newUser);
     }
 
-
     async logIn(credentials: LoginUserDto) {
         const user = await this.usersRepository.findByEmail(credentials.email);
         if (!user) throw new BadRequestException('Invalid credentials');
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password,
+        );
         if (!isPasswordValid) throw new BadRequestException('Invalid credentials');
 
         if (user.profilePicture) {
-            user.profilePicture = await this.cloudFrontService.generateSignedUrl(user.profilePicture);
+            user.profilePicture = await this.cloudFrontService.generateSignedUrl(
+                user.profilePicture,
+            );
         }
 
         const userPayload = {
@@ -65,14 +80,14 @@ export class AuthService {
             userId: userPayload.sub,
             userName: userPayload.name,
             email: userPayload.email,
-            profilePicture: user.profilePicture,
+            profilePicture: userPayload.profilePicture,
         };
     }
 
-
     async authenticateWithGoogle(token: string) {
         const googleUser = await this.verifyGoogleToken(token);
-        if (!googleUser) throw new UnauthorizedException('Google authentication failed');
+        if (!googleUser)
+            throw new UnauthorizedException('Google authentication failed');
 
         let user = await this.usersRepository.findByEmail(googleUser.email);
         if (!user) {
@@ -85,11 +100,16 @@ export class AuthService {
 
         let profilePicturePath = null;
         if (googleUser.picture) {
-            profilePicturePath = await this.usersService.uploadGoogleProfilePicture(user.id, googleUser.picture);
+            profilePicturePath = await this.usersService.uploadGoogleProfilePicture(
+                user.id,
+                googleUser.picture,
+            );
         }
 
         user = await this.usersRepository.findByEmail(user.email);
-        await this.usersService.update(user.id, { profilePicture: profilePicturePath });
+        await this.usersService.update(user.id, {
+            profilePicture: profilePicturePath,
+        });
 
         const payload = {
             sub: user.id,
@@ -112,7 +132,6 @@ export class AuthService {
         };
     }
 
-
     async verifyGoogleToken(token: string) {
         try {
             const ticket = await this.client.verifyIdToken({
@@ -121,7 +140,6 @@ export class AuthService {
             });
 
             return ticket.getPayload();
-
         } catch (error) {
             throw new UnauthorizedException('Invalid Google Token');
         }

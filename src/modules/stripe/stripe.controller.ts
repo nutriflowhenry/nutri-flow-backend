@@ -23,10 +23,13 @@ export class StripeController {
         break;
       }
       case 'customer.subscription.updated': {
+        console.log('Llegó a update');
         await this.paymentService.updatePayment(event.data.object);
         break;
       }
       case 'customer.subscription.deleted': {
+        console.log('#####');
+        console.log('Llegó a eliminación');
         await this.paymentService.subscriptiondowngrade(event.data.object);
         break;
       }
