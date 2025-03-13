@@ -6,6 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { SubscriptionStatus } from '../enums/suscriptionStatus.enum';
 
 @Entity({ name: 'payments' })
 export class Payment {
@@ -15,8 +16,12 @@ export class Payment {
   @Column()
   stripeSubscriptionId: string;
 
-  @Column({ type: 'boolean' })
-  isActive: boolean;
+  @Column({
+    type: 'enum',
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.INCOMPLETE,
+  })
+  status: SubscriptionStatus;
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;

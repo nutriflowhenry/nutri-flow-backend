@@ -1,13 +1,14 @@
 import { User } from 'src/modules/users/entities/user.entity';
+import { SubscriptionStatus } from '../enums/suscriptionStatus.enum';
 
 export class CreatePaymentDto {
-    stripeSubscriptionId: string;
+  stripeSubscriptionId: string;
 
-    isActive: boolean;
+  status: SubscriptionStatus;
 
-    user: User;
+  user: User;
 
-    currentPeriodStart: Date;
+  currentPeriodStart: Date;
 
-    currentPeriodEnd: Date;
+  currentPeriodEnd: Date;
 }

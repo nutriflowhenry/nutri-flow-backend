@@ -1,9 +1,9 @@
 import {
-    Controller,
-    Post,
-    RawBodyRequest,
-    Req,
-    UseGuards,
+  Controller,
+  Post,
+  RawBodyRequest,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import Stripe from 'stripe';
 import { PaymentsService } from '../payments/payments.service';
@@ -11,36 +11,35 @@ import { StripeWebhookGuard } from './guards/stripe.guard';
 
 @Controller('stripe')
 export class StripeController {
-    constructor(
-        // private readonly stripeService: StripeService,
-        private readonly paymentService: PaymentsService,
-    ) {
-    }
+  constructor(private readonly paymentService: PaymentsService) {}
 
-    @UseGuards(StripeWebhookGuard)
-    @Post('webhook')
-    async handleWebhook(@Req() req: RawBodyRequest<Request>) {
-        const event = req['stripeEvent'] as Stripe.Event;
-        switch (event.type) {
-            case 'customer.subscription.updated': {
-                await this.paymentService.registerPayment(event.data.object);
-                break;
-            }
-            case 'customer.subscription.deleted': {
-                await this.paymentService.subscriptiondowngrade(event.data.object);
-                break;
-            }
-            case 'invoice.paid': {
-                await this.paymentService.handleSubscriptionInvoicePaid(
-                    event.data.object,
-                );
-                break;
-            }
-            default: {
-                console.log(`Evento del tipo ${event.type}, no manejado`);
-            }
-        }
-
-        return { received: true };
+  @UseGuards(StripeWebhookGuard)
+  @Post('webhook')
+  async handleWebhook(@Req() req: RawBodyRequest<Request>) {
+    const event = req['stripeEvent'] as Stripe.Event;
+    switch (event.type) {
+      case 'customer.subscription.created': {
+        await this.paymentService.registerPayment(event.data.object);
+        break;
+      }
+      case 'customer.subscription.updated': {
+        await this.paymentService.updatePayment(event.data.object);
+        break;
+      }
+      case 'customer.subscription.deleted': {
+        await this.paymentService.subscriptiondowngrade(event.data.object);
+        break;
+      }
+      case 'invoice.paid': {
+        await this.paymentService.handleSubscriptionInvoicePaid(
+          event.data.object,
+        );
+        break;
+      }
+      default: {
+        console.log(`Evento del tipo ${event.type}, no manejado`);
+      }
     }
+    return { received: true };
+  }
 }

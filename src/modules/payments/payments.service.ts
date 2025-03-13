@@ -6,6 +6,9 @@ import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
 import { PaymentRepository } from './payment.repository';
 import { Payment } from './entities/payment.entity';
+import { GetPaymentDto } from './dto/get-payment.dto';
+import { SubscriptionStatus } from './enums/suscriptionStatus.enum';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
 
 @Injectable()
 export class PaymentsService {
@@ -76,37 +79,100 @@ export class PaymentsService {
     };
   }
 
+  async getAllPayments(getPaymentDto: GetPaymentDto) {
+    const { page, limit } = getPaymentDto;
+    const skip = (page - 1) * limit;
+    const [result, totalPayments] = await this.paymentRepository.findAll(
+      skip,
+      limit,
+    );
+    const totalPages: number = Math.ceil(totalPayments / limit);
+
+    return {
+      message: 'Registros de pagos obtenidos exitosamente',
+      data: result,
+      pagination: {
+        page,
+        limit,
+        totalPayments,
+        totalPages,
+      },
+    };
+  }
+
   async registerPayment(paymentData: Stripe.Subscription) {
-    const payment: Payment | null =
+    const localRegisterPayment: Payment | null =
       await this.paymentRepository.findOneByStripeId(paymentData.id);
-    if (!payment && paymentData.status === 'active') {
-      const stripeCustomerId: string =
-        typeof paymentData.customer === 'string'
-          ? paymentData.customer
-          : paymentData.customer.id;
+    if (!localRegisterPayment) {
+      const stripeCustomerId: string = paymentData.customer.toString();
       const user: User =
         await this.userService.findByStripeId(stripeCustomerId);
+      const isAvalidateStatus: boolean = Object.keys(
+        SubscriptionStatus,
+      ).includes(paymentData.status.toUpperCase());
+      let statusEnum: SubscriptionStatus;
+      if (isAvalidateStatus) {
+        const statusString: string =
+          paymentData.status.toUpperCase() as keyof typeof SubscriptionStatus;
+        statusEnum = SubscriptionStatus[statusString];
+      } else {
+        statusEnum = SubscriptionStatus.UNEXPECTED;
+      }
       const createPaymentData: CreatePaymentDto = {
-        isActive: true,
+        status: statusEnum,
         stripeSubscriptionId: paymentData.id,
         user,
         currentPeriodStart: new Date(paymentData.current_period_start * 1000),
         currentPeriodEnd: new Date(paymentData.current_period_end * 1000),
       };
-      await this.paymentRepository.create(createPaymentData);
-      await this.userService.updateSubscriptionType(user.id);
-    } else if (payment) {
-      const newStatus: boolean = paymentData.status !== 'active' ? false : true;
-      await this.paymentRepository.update(payment.id, { isActive: newStatus });
-      if (!newStatus) {
-        const stripeCustomerId: string =
-          typeof paymentData.customer === 'string'
-            ? paymentData.customer
-            : paymentData.customer.id;
-        const user: User =
-          await this.userService.findByStripeId(stripeCustomerId);
-        this.userService.downgradeSubscriptionType(user.id);
+      return await this.paymentRepository.create(createPaymentData);
+    }
+  }
+
+  async updatePayment(paymentData: Stripe.Subscription) {
+    const payment: Payment | null =
+      await this.paymentRepository.findOneByStripeId(paymentData.id);
+    if (!payment) {
+      const registerPayment: Payment = await this.registerPayment(paymentData);
+      if (registerPayment.status === SubscriptionStatus.ACTIVE) {
+        await this.userService.updateSubscriptionType(registerPayment.user.id);
       }
+    } else if (payment) {
+      const stripeCustomerId: string = paymentData.customer.toString();
+      const user: User =
+        await this.userService.findByStripeId(stripeCustomerId);
+      const isAvalidateStatus: boolean = Object.keys(
+        SubscriptionStatus,
+      ).includes(paymentData.status.toUpperCase());
+      let statusEnum: SubscriptionStatus;
+      if (isAvalidateStatus) {
+        const statusString: string =
+          paymentData.status.toUpperCase() as keyof typeof SubscriptionStatus;
+        statusEnum = SubscriptionStatus[statusString];
+      } else {
+        statusEnum = SubscriptionStatus.UNEXPECTED;
+      }
+      const updateData: UpdatePaymentDto = {
+        status: SubscriptionStatus.ACTIVE,
+        currentPeriodStart: new Date(paymentData.current_period_start * 1000),
+        currentPeriodEnd: new Date(paymentData.current_period_end * 1000),
+      };
+      await this.paymentRepository.update(payment.id, updateData);
+      await this.userService.updateSubscriptionType(user.id);
+      // } else if (payment) {
+      //   const newStatus: boolean = paymentData.status !== 'active' ? false : true;
+      //   await this.paymentRepository.update(payment.id, {
+      //     isActive: newStatus,
+      //   });
+      //   if (!newStatus) {
+      //     const stripeCustomerId: string =
+      //       typeof paymentData.customer === 'string'
+      //         ? paymentData.customer
+      //         : paymentData.customer.id;
+      //     const user: User =
+      //       await this.userService.findByStripeId(stripeCustomerId);
+      //     this.userService.downgradeSubscriptionType(user.id);
+      //   }
     }
   }
 
@@ -117,7 +183,7 @@ export class PaymentsService {
     );
     if (!payment) return;
     await this.paymentRepository.update(payment.id, {
-      isActive: false,
+      status: SubscriptionStatus.CANCELED,
       canceled_at: new Date(),
     });
     const consumerId: string = paymentData.customer.toString();
@@ -127,9 +193,24 @@ export class PaymentsService {
 
   async handleSubscriptionInvoicePaid(invoiceObject: Stripe.Invoice) {
     if (invoiceObject.subscription) {
-      const subscriptionId: string = invoiceObject.subscription.toString();
-      const subscriptionData =
-        this.stripeService.getSuscriptionData(subscriptionId);
+      const subscriptionStripeId: string =
+        invoiceObject.subscription.toString();
+      const subscriptionStripeData: Stripe.Subscription =
+        await this.stripeService.getSuscriptionData(subscriptionStripeId);
+      const payment: Payment | null =
+        await this.paymentRepository.findOneByStripeId(subscriptionStripeId);
+      if (payment) {
+        const updateData: UpdatePaymentDto = {
+          status: SubscriptionStatus.ACTIVE,
+          currentPeriodStart: new Date(
+            subscriptionStripeData.current_period_start * 1000,
+          ),
+          currentPeriodEnd: new Date(
+            subscriptionStripeData.current_period_end * 1000,
+          ),
+        };
+        await this.paymentRepository.update(payment.id, updateData);
+      }
     }
   }
 }
