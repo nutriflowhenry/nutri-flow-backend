@@ -5,7 +5,4 @@ import { IsString } from 'class-validator';
 export class CreateAuth0UserDto extends OmitType(CreateLocalUserDto, ['password', 'passwordConfirmation'] as const) {
     @IsString()
     auth0Id: string;
-
-    @IsString()
-    profilePicture: string;
 }

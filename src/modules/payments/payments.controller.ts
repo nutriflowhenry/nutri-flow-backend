@@ -10,6 +10,9 @@ import {
 import { PaymentsService } from './payments.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { GetPaymentDto } from './dto/get-payment.dto';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Role } from '../auth/enums/roles.enum';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('payments')
 export class PaymentsController {
@@ -32,6 +35,13 @@ export class PaymentsController {
     const limit: number = getPaymentData.limit;
     const page: number = getPaymentData.page;
     return this.paymentsService.getAllPaymentsByUser(userId, limit, page);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('all')
+  async getAllPayments(@Query() getPaymentDto: GetPaymentDto) {
+    return this.paymentsService.getAllPayments(getPaymentDto);
   }
 
   @UseGuards(AuthGuard)

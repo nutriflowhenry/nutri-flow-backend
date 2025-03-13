@@ -29,7 +29,7 @@ export class User {
     @Column({ type: 'varchar', length: 50, unique: true, nullable: true })
     auth0Id: string;
 
-    @Column({ type: 'varchar', length: 50, nullable: true })
+    @Column({ type: 'varchar', length: 100, nullable: true })
     profilePicture: string;
 
     @Column({
