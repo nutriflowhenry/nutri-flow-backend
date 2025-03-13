@@ -8,6 +8,7 @@ import { PublicUserDto } from '../users/dto/public-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { UsersService } from '../users/users.service';
+import { CloudFrontService } from '../aws/cloud-front.service';
 
 
 @Injectable()
@@ -15,8 +16,9 @@ export class AuthService {
     private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
     constructor(
-        private readonly usersService: UsersService,
+        private readonly cloudFrontService: CloudFrontService,
         private readonly usersRepository: UsersRepository,
+        private readonly usersService: UsersService,
         private readonly jwtService: JwtService) {
     }
 
@@ -42,11 +44,16 @@ export class AuthService {
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
         if (!isPasswordValid) throw new BadRequestException('Invalid credentials');
 
+        if (user.profilePicture) {
+            user.profilePicture = await this.cloudFrontService.generateSignedUrl(user.profilePicture);
+        }
+
         const userPayload = {
             sub: user.id,
             name: user.name,
             email: user.email,
             role: user.role,
+            profilePicture: user.profilePicture,
         };
 
         console.log({ userPayload });
@@ -68,25 +75,27 @@ export class AuthService {
 
         let user = await this.usersRepository.findByEmail(googleUser.email);
         if (!user) {
-            let profilePicturePath = null;
-
-            if (googleUser.picture) {
-                profilePicturePath = await this.usersService.uploadGoogleProfilePicture(user.id, googleUser.picture);
-            }
-
             user = await this.usersRepository.createAuth0User({
                 name: googleUser.given_name,
                 email: googleUser.email,
                 auth0Id: googleUser.sub,
-                profilePicture: profilePicturePath,
             });
         }
+
+        let profilePicturePath = null;
+        if (googleUser.picture) {
+            profilePicturePath = await this.usersService.uploadGoogleProfilePicture(user.id, googleUser.picture);
+        }
+
+        user = await this.usersRepository.findByEmail(user.email);
+        await this.usersService.update(user.id, { profilePicture: profilePicturePath });
 
         const payload = {
             sub: user.id,
             name: user.name,
             email: user.email,
-            role: user.role
+            role: user.role,
+            profilePicture: googleUser.picture,
         };
 
         console.log({ payload });
