@@ -65,6 +65,7 @@ export class AuthService {
             userId: userPayload.sub,
             userName: userPayload.name,
             email: userPayload.email,
+            profilePicture: user.profilePicture,
         };
     }
 
@@ -107,6 +108,7 @@ export class AuthService {
             userId: payload.sub,
             userName: payload.name,
             email: payload.email,
+            profilePicture: payload.profilePicture,
         };
     }
 

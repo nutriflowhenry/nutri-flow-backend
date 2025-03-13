@@ -14,7 +14,7 @@ export class ImagesController {
     @Get('profile/upload-url/:userId')
     async getProfileUploadUrl(
         @Param('userId') userId: string,
-        @Query('fileType') fileType: string): Promise<{ uploadUrl: string }> {
+        @Query('type') fileType: string): Promise<{ uploadUrl: string }> {
         const uploadUrl = await this.usersService.getImageUploadUrl(userId, fileType);
         return { uploadUrl };
     }
