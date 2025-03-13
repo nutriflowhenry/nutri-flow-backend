@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(255, 246, 234);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #ff7f50;
+        }
+        h2 {
+            font-size: 20px;
+            color: #333;
+        }
+        p {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.5;
+        }
+        ul {
+            text-align: left;
+            display: inline-block;
+            margin-top: 15px;
+            padding: 0;
+            list-style: none;
+        }
+        ul li {
+            font-size: 16px;
+            margin: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        ul li::before {
+            content: "✔️";
+            position: absolute;
+            left: 0;
+            color: #ff7f50;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>¡Hola, <%= name %>! 👋</h1>
+        <h2>Bienvenido a <strong>Nutriflow</strong> 🥗</h2>
+
+        <p>Nos alegra que te hayas unido a nuestra comunidad. En <strong>Nutriflow</strong>, te ayudaremos a mejorar tu alimentación herramientas para mantenerte saludable.</p>
+
+        <h2>✨ ¿Qué puedes hacer en Nutriflow? ✨</h2>
+        <ul>
+            <li>Registrar y monitorear tu progreso 📊</li>
+            <li>Explorar y comparte recetas saludables en nuestro foro 🍏</li>
+            <li>Conectarte con una comunidad de bienestar 💬</li>
+            <li>Conversa con un nutriólogo en tiempo real 👨‍⚕️</li>
+            <li>Pide ayuda a nuestro chatbot 🤖</li>
+
+        </ul>
+
+        <p>Explora la app y comienza tu camino hacia un estilo de vida más saludable. 💪</p>
+
+        <p>Si tienes alguna duda, no dudes en contactarnos.</p>
+
+        <p class="footer">Saludos,<br/>Equipo de <strong>Nutriflow</strong></p>
+    </div>
+</body>
+</html>

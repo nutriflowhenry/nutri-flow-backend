@@ -11,8 +11,10 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import * as bcrypt from 'bcrypt';
 import { SubscriptionType } from './enums/subscription-type.enum';
 
+
 @Injectable()
 export class UsersRepository {
+
     constructor(@InjectRepository(User) private repository: Repository<User>) {
     }
 

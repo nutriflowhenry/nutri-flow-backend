@@ -14,6 +14,7 @@ import { AwsModule } from '../aws/aws.module';
     exports: [UsersRepository, UsersService],
 })
 export class UsersModule implements OnModuleInit {
+
     constructor(private readonly usersService: UsersService) {
     }
 

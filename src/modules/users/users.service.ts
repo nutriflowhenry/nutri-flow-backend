@@ -9,14 +9,15 @@ import { S3Service } from '../aws/s3-service';
 import { CloudFrontService } from '../aws/cloud-front.service';
 import axios from 'axios';
 
+
 @Injectable()
 export class UsersService {
+
     constructor(
         private readonly cloudFrontService: CloudFrontService,
         private readonly usersRepository: UsersRepository,
         private readonly s3Service: S3Service) {
     }
-
 
     async createAdmin(adminData: CreateAdminDto): Promise<void> {
         return this.usersRepository.createAdmin(adminData);
@@ -105,12 +106,12 @@ export class UsersService {
         try {
             const response = await axios.get(googleImageUrl, { responseType: 'arraybuffer' });
             const imageBuffer = Buffer.from(response.data);
-            const fileType = 'jpg'; // Default to jpg, could be dynamic
+            const fileType = 'jpg';
             const filePath = `profile-pictures/${userId}.${fileType}`;
 
             await this.s3Service.uploadFile(filePath, imageBuffer, `image/${fileType}`);
 
-            await this.update(userId, { profilePicture: filePath }); // Update DB
+            await this.update(userId, { profilePicture: filePath });
             return filePath;
 
         } catch (error) {
