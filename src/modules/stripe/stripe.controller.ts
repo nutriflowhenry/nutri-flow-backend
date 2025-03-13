@@ -23,6 +23,7 @@ export class StripeController {
         break;
       }
       case 'customer.subscription.updated': {
+        console.log('Llegó a update');
         await this.paymentService.updatePayment(event.data.object);
         break;
       }

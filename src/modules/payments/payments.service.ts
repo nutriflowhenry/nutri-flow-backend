@@ -148,6 +148,7 @@ export class PaymentsService {
           name: user.name,
           subscription: registerPayment,
         });
+        console.log('Se registró porqué no existia');
       }
     } else if (payment) {
       const stripeCustomerId: string = paymentData.customer.toString();
@@ -157,6 +158,8 @@ export class PaymentsService {
         SubscriptionStatus,
       ).includes(paymentData.status.toUpperCase());
       let statusEnum: SubscriptionStatus;
+      console.log('#### Actualización');
+      console.log(paymentData);
       if (isAvalidateStatus) {
         const statusString: string =
           paymentData.status.toUpperCase() as keyof typeof SubscriptionStatus;
