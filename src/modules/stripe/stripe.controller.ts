@@ -27,6 +27,8 @@ export class StripeController {
         break;
       }
       case 'customer.subscription.deleted': {
+        console.log('#####');
+        console.log('Llegó a eliminación');
         await this.paymentService.subscriptiondowngrade(event.data.object);
         break;
       }
