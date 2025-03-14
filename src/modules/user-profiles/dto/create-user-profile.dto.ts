@@ -1,25 +1,19 @@
-import { Type } from 'class-transformer';
 import {
-  IsDate,
-  IsDecimal,
   IsEnum,
+  IsISO8601,
   IsNotEmpty,
   IsNumber,
-  IsUUID,
   Max,
   Min,
 } from 'class-validator';
 import { Gender } from '../enums/gender.enum';
+import { ActivityLevel } from '../enums/activity-level.enum';
+import { Goal } from '../enums/goal.enum';
 
 export class CreateUserProfileDto {
   @IsNotEmpty()
-  @IsUUID()
-  user: string;
-
-  @IsNotEmpty()
-  @IsDate()
-  @Type(() => Date)
-  birthdate: Date;
+  @IsISO8601({ strict: true })
+  birthdate: string;
 
   @IsNotEmpty()
   @IsEnum(Gender)
@@ -36,4 +30,12 @@ export class CreateUserProfileDto {
   @Min(0.5)
   @Max(2.99)
   height: number;
+
+  @IsNotEmpty()
+  @IsEnum(ActivityLevel)
+  activityLevel: ActivityLevel;
+
+  @IsNotEmpty()
+  @IsEnum(Goal)
+  weightGoal: Goal;
 }

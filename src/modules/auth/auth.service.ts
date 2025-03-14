@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { UsersRepository } from '../users/users.repository';
 import { JwtService } from '@nestjs/jwt';
 import { CreateLocalUserDto } from '../users/dto/create-local-user.dto';
@@ -7,149 +11,141 @@ import { plainToInstance } from 'class-transformer';
 import { PublicUserDto } from '../users/dto/public-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { OAuth2Client } from 'google-auth-library';
-
+import { UsersService } from '../users/users.service';
+import { CloudFrontService } from '../aws/cloud-front.service';
+import { TypedEventEmitter } from '../emitters/typed-event-emitter.class';
 
 @Injectable()
 export class AuthService {
-   private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-   constructor(
-      private usersRepository: UsersRepository,
-      private jwtService: JwtService) {
-   }
+    constructor(
+        private readonly cloudFrontService: CloudFrontService,
+        private readonly usersRepository: UsersRepository,
+        private readonly usersService: UsersService,
+        private readonly jwtService: JwtService,
+        private readonly eventEmitter: TypedEventEmitter,
+    ) {
+    }
 
-   async signUp(userData: CreateLocalUserDto): Promise<PublicUserDto> {
-      const dbUser = await this.usersRepository.findByEmail(userData.email);
-      if (dbUser) throw new BadRequestException('Email already exists');
+    async signUp(userData: CreateLocalUserDto): Promise<PublicUserDto> {
+        const dbUser = await this.usersRepository.findByEmail(userData.email);
+        if (dbUser) throw new BadRequestException('Email already exists');
 
-      const { passwordConfirmation, ...filteredData } = userData;
+        const { passwordConfirmation, ...filteredData } = userData;
 
-      const newUser = this.usersRepository.createLocalUser({
-         ...filteredData,
-         password: await bcrypt.hash(userData.password, 10)
-      });
+        const newUser = this.usersRepository.createLocalUser({
+            ...filteredData,
+            password: await bcrypt.hash(userData.password, 10),
+        });
 
-      return plainToInstance(PublicUserDto, newUser);
-   }
+        this.eventEmitter.emit('user.welcome', {
+            name: (await newUser).name,
+            email: (await newUser).email,
+        });
 
+        return plainToInstance(PublicUserDto, newUser);
+    }
 
-   async logIn(credentials: LoginUserDto) {
-      const user = await this.usersRepository.findByEmail(credentials.email);
-      if (!user) throw new BadRequestException('Invalid credentials');
+    async logIn(credentials: LoginUserDto) {
+        const user = await this.usersRepository.findByEmail(credentials.email);
+        if (!user) throw new BadRequestException('Invalid credentials');
 
-      const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
-      if (!isPasswordValid) throw new BadRequestException('Invalid credentials');
+        const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password,
+        );
+        if (!isPasswordValid) throw new BadRequestException('Invalid credentials');
 
-      const userPayload = {
-         sub: user.id,
-         name: user.name,
-         email: user.email,
-         role: user.role,
-      };
+        if (user.profilePicture) {
+            user.profilePicture = await this.cloudFrontService.generateSignedUrl(
+                user.profilePicture,
+            );
+        }
 
-      console.log({ userPayload });
+        const userPayload = {
+            sub: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            profilePicture: user.profilePicture,
+        };
 
-      const token = this.jwtService.sign(userPayload);
+        console.log({ userPayload });
 
-      return {
-         id: userPayload.sub,
-         token,
-      };
-   }
+        const jwt = this.jwtService.sign(userPayload);
 
+        return {
+            token: jwt,
+            userId: userPayload.sub,
+            userName: userPayload.name,
+            email: userPayload.email,
+            profilePicture: userPayload.profilePicture,
+        };
+    }
 
-   async authenticateWithGoogle(token: string) {
-      const googleUser = await this.verifyGoogleToken(token);
-      if (!googleUser) throw new UnauthorizedException('Google authentication failed');
+    async authenticateWithGoogle(token: string) {
+        const googleUser = await this.verifyGoogleToken(token);
+        if (!googleUser)
+            throw new UnauthorizedException('Google authentication failed');
 
-      let user = await this.usersRepository.findByEmail(googleUser.email);
-      if (!user) {
-         user = await this.usersRepository.createAuth0User({
-            name: googleUser.given_name,
-            email: googleUser.email,
-            auth0Id: googleUser.sub
-         });
-      }
+        let user = await this.usersRepository.findByEmail(googleUser.email);
+        if (!user) {
+            user = await this.usersRepository.createAuth0User({
+                name: googleUser.given_name,
+                email: googleUser.email,
+                auth0Id: googleUser.sub,
+            });
+        }
 
-      const payload = {
-         sub: user.id,
-         name: user.name,
-         email: user.email,
-         role: user.role
-      };
+        let profilePicturePath = null;
+        if (googleUser.picture) {
+            profilePicturePath = await this.usersService.uploadGoogleProfilePicture(
+                user.id,
+                googleUser.picture,
+            );
+        }
 
-      console.log({ payload });
+        user = await this.usersRepository.findByEmail(user.email);
+        await this.usersService.update(user.id, { profilePicture: profilePicturePath });
 
-      const jwt = this.jwtService.sign(payload);
+        if (user.profilePicture) {
+            user.profilePicture = await this.cloudFrontService.generateSignedUrl(
+                user.profilePicture,
+            );
+        }
 
-      return {
-         id: payload.sub,
-         token: jwt
-      };
-   }
+        const payload = {
+            sub: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            profilePicture: user.profilePicture,
+        };
 
+        console.log({ payload });
 
-   async verifyGoogleToken(token: string) {
-      try {
-         const ticket = await this.client.verifyIdToken({
-            idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID,
-         });
+        const jwt = this.jwtService.sign(payload);
 
-         return ticket.getPayload();
+        return {
+            token: jwt,
+            userId: payload.sub,
+            userName: payload.name,
+            email: payload.email,
+            profilePicture: payload.profilePicture,
+        };
+    }
 
-      } catch (error) {
-         throw new UnauthorizedException('Invalid Google Token');
-      }
-   }
+    async verifyGoogleToken(token: string) {
+        try {
+            const ticket = await this.client.verifyIdToken({
+                idToken: token,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
 
-
-   // async validateAuth0User(email: string, auth0Id: string, name: string) {
-   //    let user = await this.usersRepository.findByAuthId(auth0Id);
-   //    if (!user) user = await this.usersRepository.createAuth0User({ auth0Id, email, name });
-   //
-   //    const payload = {
-   //       sub: user.id,
-   //       name: user.name,
-   //       email: user.email,
-   //       role: user.role,
-   //    };
-   //
-   //    console.log({ payload });
-   //
-   //    return {
-   //       id: payload.sub,
-   //       token: this.jwtService.sign(payload)
-   //    };
-   // }
-   //
-   // async exchangeCodeForToken(code: any) {
-   //    console.log('Request body:', {
-   //       grant_type: 'authorization_code',
-   //       client_id: process.env.AUTH0_CLIENT_ID,
-   //       client_secret: process.env.AUTH0_CLIENT_SECRET,
-   //       redirect_uri: process.env.AUTH0_CALLBACK_URL,
-   //       code,
-   //    });
-   //
-   //    const response = await axios.post(`https://${process.env.AUTH0_DOMAIN}/oauth/token`, {
-   //       grant_type: 'authorization_code',
-   //       client_id: process.env.AUTH0_CLIENT_ID,
-   //       client_secret: process.env.AUTH0_CLIENT_SECRET,
-   //       redirect_uri: process.env.AUTH0_CALLBACK_URL,
-   //       code
-   //    });
-   //
-   //    console.log(response.data);
-   //    return response.data; // { access_token, id_token, ... }
-   // }
-   //
-   // async fetchUserProfile(accessToken: any) {
-   //    const response = await axios.get(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
-   //       headers: { Authorization: `Bearer ${accessToken}` },
-   //    });
-   //
-   //    console.log(response.data);
-   //    return response.data; // { sub, email, name, ... }
-   // }
+            return ticket.getPayload();
+        } catch (error) {
+            throw new UnauthorizedException('Invalid Google Token');
+        }
+    }
 }

@@ -30,9 +30,9 @@ export class WaterTrackerRepository {
   ): Promise<WaterTracker> {
     let updatedAmount: number = dailyWaterTracker.amount;
     if (dataUpdate.action === WaterTrackerAction.INCREMENT) {
-      updatedAmount += 1;
+      updatedAmount += 50;
     } else if (dataUpdate.action === WaterTrackerAction.DECREMENT) {
-      updatedAmount = Math.max(0, updatedAmount - 1);
+      updatedAmount = Math.max(0, updatedAmount - 50);
     }
     this.waterTrackerRepository.merge(dailyWaterTracker, {
       amount: updatedAmount,

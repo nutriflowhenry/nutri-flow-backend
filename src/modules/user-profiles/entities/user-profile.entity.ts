@@ -12,6 +12,8 @@ import { Gender } from '../enums/gender.enum';
 // import { DietType } from '../enums/diet-type.enum';
 import { FoodTracker } from 'src/modules/food-tracker/entities/food-tracker.entity';
 import { WaterTracker } from 'src/modules/water-tracker/entities/water-tracker.entity';
+import { ActivityLevel } from '../enums/activity-level.enum';
+import { Goal } from '../enums/goal.enum';
 
 @Entity()
 export class UserProfile {
@@ -31,7 +33,7 @@ export class UserProfile {
   birthdate: Date;
 
   @Column({ type: 'enum', enum: Gender })
-  gender: string;
+  gender: Gender;
 
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: false })
   weight: number;
@@ -39,11 +41,20 @@ export class UserProfile {
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: false })
   height: number;
 
-  // @Column({ type: 'enum', enum: ActivityLevel, nullable: false })
-  // activityLevel: ActivityLevel;
+  @Column({ type: 'enum', enum: ActivityLevel, nullable: true })
+  activityLevel: ActivityLevel;
 
-  // @Column({ type: 'enum', enum: Goal, nullable: false })
-  // goal: Goal;
+  @Column({ type: 'enum', enum: Goal, nullable: true })
+  weightGoal: Goal;
+
+  @Column({ type: 'integer', default: 0 })
+  age: number;
+
+  @Column({ type: 'integer', default: 0 })
+  caloriesGoal: number;
+
+  @Column({ type: 'integer', default: 0 })
+  hydrationGoal: number;
 
   // @Column({ type: 'enum', enum: DietType, default: DietType.NONE })
   // dietType: string;
