@@ -107,16 +107,20 @@ export class AuthService {
         }
 
         user = await this.usersRepository.findByEmail(user.email);
-        await this.usersService.update(user.id, {
-            profilePicture: profilePicturePath,
-        });
+        await this.usersService.update(user.id, { profilePicture: profilePicturePath });
+
+        if (user.profilePicture) {
+            user.profilePicture = await this.cloudFrontService.generateSignedUrl(
+                user.profilePicture,
+            );
+        }
 
         const payload = {
             sub: user.id,
             name: user.name,
             email: user.email,
             role: user.role,
-            profilePicture: googleUser.picture,
+            profilePicture: user.profilePicture,
         };
 
         console.log({ payload });

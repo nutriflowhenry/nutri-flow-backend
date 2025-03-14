@@ -14,11 +14,17 @@ export class SecretsManagerService implements OnModuleInit {
 
 
     private async loadSecret(secretId: string): Promise<void> {
-        const command = new GetSecretValueCommand({ SecretId: secretId });
-
         try {
+            const command = new GetSecretValueCommand({ SecretId: secretId });
             const response = await this.secretsManagerClient.send(command);
-            this.secrets[secretId] = response.SecretString || '';
+
+            if (!response.SecretString) {
+                throw new Error(`Secret ${secretId} is empty`);
+            }
+
+            this.secrets[secretId] =
+                Buffer.from(response.SecretString, 'base64').toString('utf-8');
+            
             console.log(`Secret loaded: ${secretId}`);
 
         } catch (error) {
