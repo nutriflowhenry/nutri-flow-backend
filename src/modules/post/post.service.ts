@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -22,9 +23,10 @@ export class PostService {
       throw new NotFoundException('Usuario no encontrado');
     }
     const newPost: Post = await this.postRepository.create(user, createPostDto);
+    const { author, ...sanitizedPost } = newPost;
     return {
       message: 'Post creado exitosamente con status pendiente',
-      newPost,
+      sanitizedPost,
     };
   }
 
@@ -36,20 +38,30 @@ export class PostService {
     return `This action returns a #${id} post`;
   }
 
-  async update(postId: string, userId: string, updatePostDto: UpdatePostDto) {
+  async update(postId: string, userId: string, updatePostData: UpdatePostDto) {
+    const updateData: string[] = Object.keys(updatePostData);
+    if (updateData.length === 0) {
+      throw new BadRequestException(
+        'No se proporcionaron datos para realizar una actualización',
+      );
+    }
     const existingPost: Post | null = await this.postRepository.get(postId);
     if (!existingPost) {
       throw new NotFoundException(`El post con id ${postId} no existe`);
     }
     const isUserAuthor: boolean = existingPost.author.id === userId;
     if (!isUserAuthor) {
-      throw new ForbiddenException('No eres el autor de este post');
+      throw new ForbiddenException(
+        'Usuario no autorizado para modificar este post',
+      );
     }
-    await this.postRepository.update(existingPost, updatePostDto);
-    const updatedPost: Post = await this.postRepository.get(postId);
+    const updatedPost: Post = await this.postRepository.update(
+      existingPost,
+      updatePostData,
+    );
     return {
       message: `El post con id ${updatedPost.id} se actualizó correctamente`,
-      updatePostDto,
+      updatedPost,
     };
   }
 

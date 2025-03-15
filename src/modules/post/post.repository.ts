@@ -5,6 +5,7 @@ import { Post } from './entities/post.entity';
 import { CreatePostDto } from './dto/post/create-post.dto';
 import { User } from '../users/entities/user.entity';
 import { UpdatePostDto } from './dto/post/update-post.dto';
+import { PostStatus } from './enums/post-status.enum';
 
 @Injectable()
 export class PostRepository {
@@ -17,7 +18,10 @@ export class PostRepository {
   }
 
   async get(postId: string): Promise<Post | null> {
-    return await this.postRepository.findOne({ where: { id: postId } });
+    return await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['author'],
+    });
   }
 
   async update(
@@ -25,6 +29,7 @@ export class PostRepository {
     updatePostDto: UpdatePostDto,
   ): Promise<Post> {
     this.postRepository.merge(existingPost, updatePostDto);
+    existingPost.status = PostStatus.PENDING;
     return this.postRepository.save(existingPost);
   }
 }

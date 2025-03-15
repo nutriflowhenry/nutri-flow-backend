@@ -19,7 +19,8 @@ export class CreatePostDto {
 
   @IsString()
   @IsNotEmpty()
-  @Length(500, 5000)
+  // @Length(500, 5000)
+  @Length(10, 200) // Para pruebas
   content: string;
 
   @IsArray()
