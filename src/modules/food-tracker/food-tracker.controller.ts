@@ -16,7 +16,6 @@ import { CreateFoodTrackerDto } from './dto/create-food-tracker.dto';
 import { UpdateFoodTrackerDto } from './dto/update-food-tracker.dto';
 import { GetFoodTrackerDto } from './dto/get-food-tracker.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { subscribeOn } from 'rxjs';
 
 @Controller('food-tracker')
 export class FoodTrackerController {
