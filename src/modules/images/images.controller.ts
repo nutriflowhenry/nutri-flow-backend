@@ -21,9 +21,10 @@ export class ImagesController {
 
 
     @Get('meal/upload-url/:foodTrackerId')
-    getMealUploadUrl(
+    async getMealUploadUrl(
         @Param('foodTrackerId') foodTrackerId: string,
-        @Query('fileType') fileType: string,): Promise<string> {
-        return this.foodTrackerService.getImageUploadUrl(foodTrackerId, fileType);
+        @Query('type') fileType: string,): Promise<{ uploadUrl: string }> {
+        const uploadUrl = await this.foodTrackerService.getImageUploadUrl(foodTrackerId, fileType);
+        return { uploadUrl };
     }
 }
