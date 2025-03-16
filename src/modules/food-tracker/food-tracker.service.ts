@@ -11,12 +11,14 @@ import { UserProfilesService } from '../user-profiles/user-profiles.service';
 import { UserProfile } from '../user-profiles/entities/user-profile.entity';
 import { GetFoodTrackerDto } from './dto/get-food-tracker.dto';
 import { S3Service } from '../aws/s3-service';
+import { CloudFrontService } from '../aws/cloud-front.service';
 
 @Injectable()
 export class FoodTrackerService {
     constructor(
         private readonly foodTrackerRepository: FoodTrackerRepository,
         private readonly userProfilesService: UserProfilesService,
+        private readonly cloudFrontService: CloudFrontService,
         private readonly s3Service: S3Service,
     ) {
     }
@@ -85,10 +87,20 @@ export class FoodTrackerService {
                 page,
                 today,
             );
+
+        const mappedResults = await Promise.all(
+            dailyFoodTracker.results.map(async foodTracker => {
+                if (foodTracker.image) {
+                    foodTracker.image = await this.cloudFrontService.generateSignedUrl(foodTracker.image);
+                }
+                return foodTracker;
+            })
+        );
+
         return {
             message: `Registros de comida para el día ${today} considerando estar en la página ${page} con ${limit} registros por cada página`,
             data: {
-                results: dailyFoodTracker.results,
+                results: mappedResults,
                 total: dailyFoodTracker.total,
                 page: getFoodTrackerData.page,
                 limit: getFoodTrackerData.limit,
