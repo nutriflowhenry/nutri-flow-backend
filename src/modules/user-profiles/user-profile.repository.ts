@@ -16,10 +16,16 @@ export class UsersProfileRepository {
   async create(
     createUserProfileDto: CreateUserProfileDto,
     user: User,
+    hydrationGoal: number,
+    caloriesGoal: number,
+    age: number,
   ): Promise<UserProfile> {
-    const newProfile = this.userProfileRepository.create({
+    const newProfile: UserProfile = this.userProfileRepository.create({
       ...createUserProfileDto,
       user,
+      hydrationGoal,
+      caloriesGoal,
+      age,
     });
     return this.userProfileRepository.save(newProfile);
   }
@@ -36,6 +42,9 @@ export class UsersProfileRepository {
   async update(
     userProfile: UserProfile,
     updateUserProfileDto: UpdateUserProfileDto,
+    hydrationGoal?: number,
+    newCaloriesGoal?: number,
+    age?: number,
   ): Promise<UserProfile> {
     const dtoFields: string[] = Object.keys(updateUserProfileDto);
     if (dtoFields.length === 0) {
@@ -53,6 +62,13 @@ export class UsersProfileRepository {
       throw new BadRequestException(
         'No se pudieron realizar cambios en el registro, revise los valores enviados',
       );
+    }
+    if (hydrationGoal) {
+      userProfile.hydrationGoal = hydrationGoal;
+    }
+    if (newCaloriesGoal) {
+      userProfile.caloriesGoal = newCaloriesGoal;
+      userProfile.age = age;
     }
 
     await this.userProfileRepository.save(userProfile);

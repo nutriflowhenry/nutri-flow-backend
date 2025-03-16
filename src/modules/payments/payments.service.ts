@@ -143,7 +143,7 @@ export class PaymentsService {
         const user: User = await this.userService.findById(
           registerPayment.user.id,
         );
-        this.typedEventEmitter.emit('premium.subscription.congrats', {
+        this.typedEventEmitter.emitAsync('premium.subscription.created', {
           email: user.email,
           name: user.name,
           subscription: registerPayment,

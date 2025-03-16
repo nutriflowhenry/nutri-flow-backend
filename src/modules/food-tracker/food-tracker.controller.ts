@@ -85,7 +85,8 @@ export class FoodTrackerController {
     }
 
     @Put(':foodTrackerId/image')
-    async updateProfilePicture(
+    @UseGuards(AuthGuard)
+    async updateImage(
         @Req() req: { user: { sub: string } },
         @Param('foodTrackerId') foodTrackerId: string,
         @Body('fileType') fileType: string,): Promise<object> {
