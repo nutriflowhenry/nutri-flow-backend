@@ -103,11 +103,11 @@ export class PaymentsService {
   }
 
   async registerPayment(paymentData: Stripe.Subscription) {
+    console.log('### Se inició el registro');
     const localRegisterPayment: Payment | null =
       await this.paymentRepository.findOneByStripeId(paymentData.id);
     if (!localRegisterPayment) {
       const stripeCustomerId: string = paymentData.customer.toString();
-      console.log(stripeCustomerId);
       const user: User =
         await this.userService.findByStripeId(stripeCustomerId);
       const isAvalidateStatus: boolean = Object.keys(
@@ -130,6 +130,7 @@ export class PaymentsService {
       };
       const registeredPayment: Payment =
         await this.paymentRepository.create(createPaymentData);
+      console.log('### Se terminó el registro');
       return registeredPayment;
     }
   }
@@ -138,6 +139,7 @@ export class PaymentsService {
     const payment: Payment | null =
       await this.paymentRepository.findOneByStripeId(paymentData.id);
     if (!payment) {
+      console.log('### Llegó a actualización y aún no existia');
       const registerPayment: Payment = await this.registerPayment(paymentData);
       if (registerPayment.status === SubscriptionStatus.ACTIVE) {
         await this.userService.updateSubscriptionType(registerPayment.user.id);
@@ -199,10 +201,11 @@ export class PaymentsService {
     );
     console.log(payment);
     if (!payment) return;
-    await this.paymentRepository.update(payment.id, {
+    const paymentCancelData: UpdatePaymentDto = {
       status: SubscriptionStatus.CANCELED,
       canceled_at: new Date(),
-    });
+    };
+    await this.paymentRepository.update(payment.id, paymentCancelData);
     const consumerId: string = paymentData.customer.toString();
     const user: User = await this.userService.findByStripeId(consumerId);
     await this.userService.downgradeSubscriptionType(user.id);
