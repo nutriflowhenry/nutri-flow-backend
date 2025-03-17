@@ -20,6 +20,7 @@ import { StripeWebhookMiddleware } from './modules/stripe/middleware/stripe.midd
 import { EmailModule } from './modules/email/email.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EmitterModule } from './modules/emitters/emitter.module';
+import { CommentModule } from './modules/post/comment/comment.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { EmitterModule } from './modules/emitters/emitter.module';
     PaymentsModule,
     EmailModule,
     PostModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

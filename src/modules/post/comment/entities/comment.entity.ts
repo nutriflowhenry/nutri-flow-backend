@@ -6,11 +6,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Post } from './post.entity';
 import { User } from 'src/modules/users/entities/user.entity';
+import { Post } from '../../entities/post.entity';
 
 @Entity({ name: 'comments' })
-export class PostComment {
+export class Comment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

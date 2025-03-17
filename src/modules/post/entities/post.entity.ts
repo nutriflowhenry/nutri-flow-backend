@@ -12,9 +12,9 @@ import { PostStatus } from '../enums/post-status.enum';
 import { PostImage } from './post-image.entity';
 import { PostReaction } from './post-reaction.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import { PostComment } from './post-comment.entity';
 import { PostFavorite } from './post-favorite.entity';
 import { Tag } from '../enums/tag.enum';
+import { Comment } from '../comment/entities/comment.entity';
 
 @Entity({ name: 'posts' })
 export class Post {
@@ -48,10 +48,10 @@ export class Post {
   })
   images?: PostImage[];
 
-  @OneToMany(() => PostComment, (postComment) => postComment.post, {
+  @OneToMany(() => Comment, (postComment) => postComment.post, {
     nullable: true,
   })
-  comments?: PostComment[];
+  comments?: Comment[];
 
   @OneToMany(() => PostReaction, (postReaction) => postReaction.post, {
     nullable: true,

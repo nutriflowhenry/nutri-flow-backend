@@ -9,11 +9,16 @@ import {
   UseGuards,
   Req,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/post/create-post.dto';
 import { UpdatePostDto } from './dto/post/update-post.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Role } from '../auth/enums/roles.enum';
+import { GetPostDto } from './dto/post/get-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -29,8 +34,14 @@ export class PostController {
   }
 
   @UseGuards(AuthGuard)
+  @Get('allActive')
+  async getAllActive(@Query() getPostData: GetPostDto) {
+    return this.postService.getAllActive(getPostData);
+  }
+
+  @UseGuards(AuthGuard)
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseUUIDPipe) postId: string,
     @Body() updatePostDto: UpdatePostDto,
     @Req() req: { user: { sub: string } },
@@ -38,9 +49,11 @@ export class PostController {
     return this.postService.update(postId, req.user.sub, updatePostDto);
   }
 
-  @Get()
-  findAll() {
-    return this.postService.findAll();
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('approve/:id')
+  async approve(@Param('id', ParseUUIDPipe) postId: string) {
+    return this.postService.approve(postId);
   }
 
   @Get(':id')

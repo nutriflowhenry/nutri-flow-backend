@@ -14,7 +14,7 @@ import { AuthProvider } from '../enums/auth-provider.enum';
 import { Role } from '../../auth/enums/roles.enum';
 import { Payment } from '../../payments/entities/payment.entity';
 import { Post } from 'src/modules/post/entities/post.entity';
-import { PostComment } from 'src/modules/post/entities/post-comment.entity';
+import { Comment } from 'src/modules/post/comment/entities/comment.entity';
 import { PostReaction } from 'src/modules/post/entities/post-reaction.entity';
 import { PostFavorite } from 'src/modules/post/entities/post-favorite.entity';
 
@@ -52,8 +52,8 @@ export class User {
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
 
-  @OneToMany(() => PostComment, (postComment) => postComment.author)
-  comments: PostComment[];
+  @OneToMany(() => Comment, (comment) => comment.author)
+  comments: Comment[];
 
   @OneToMany(() => PostReaction, (postReaction) => postReaction.user)
   reactions: PostReaction[];
