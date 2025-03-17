@@ -1,10 +1,12 @@
 import { Injectable, Search } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  Not,
   QueryBuilder,
   QueryRunner,
   Repository,
   SelectQueryBuilder,
+  UpdateResult,
 } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { CreatePostDto } from './dto/post/create-post.dto';
@@ -41,10 +43,6 @@ export class PostRepository {
   ): Promise<[Post[], number]> {
     const { limit, page, searchOnTitle, tags } = getPostData;
     const skip: number = (page - 1) * limit;
-    console.log(limit);
-    console.log(page);
-    console.log('####');
-    console.log(skip);
     const postQueryBuilder: SelectQueryBuilder<Post> =
       this.postRepository.createQueryBuilder('post');
     postQueryBuilder.where('post.status = :status', { status });
@@ -69,7 +67,11 @@ export class PostRepository {
     authorId: string,
   ): Promise<Post | null> {
     return await this.postRepository.findOne({
-      where: { id: postId, author: { id: authorId } },
+      where: {
+        id: postId,
+        author: { id: authorId },
+        status: Not(PostStatus.INACTIVE),
+      },
     });
   }
 
@@ -85,5 +87,15 @@ export class PostRepository {
   async approve(id: string): Promise<Post> {
     await this.postRepository.update(id, { status: PostStatus.APPROVED });
     return this.findOneActive(id);
+  }
+
+  async findOneNotInactive(id: string): Promise<Post | null> {
+    return this.postRepository.findOne({
+      where: { id, status: Not(PostStatus.INACTIVE) },
+    });
+  }
+
+  async ban(id: string): Promise<UpdateResult> {
+    return this.postRepository.update(id, { status: PostStatus.INACTIVE });
   }
 }

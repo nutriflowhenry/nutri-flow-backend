@@ -6,6 +6,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-commnet.dto';
 import { User } from 'src/modules/users/entities/user.entity';
 import { Post } from '../entities/post.entity';
+import { PostStatus } from '../enums/post-status.enum';
 
 @Injectable()
 export class CommentRepository {
@@ -47,6 +48,7 @@ export class CommentRepository {
       .leftJoinAndSelect('comment.post', 'post')
       .select('comment')
       .where('post.id = :id', { id: postId })
+      .andWhere('post.status = :status', { status: PostStatus.APPROVED })
       .orderBy('comment.createdAt', 'DESC')
       .addOrderBy('comment.id', 'ASC')
       .skip(skip)

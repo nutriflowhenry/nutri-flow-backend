@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/post/create-post.dto';
@@ -12,8 +13,7 @@ import { PostRepository } from './post.repository';
 import { Post } from './entities/post.entity';
 import { PostStatus } from './enums/post-status.enum';
 import { GetPostDto } from './dto/post/get-post.dto';
-import { link } from 'fs';
-import { LimitExceededException } from '@aws-sdk/client-secrets-manager';
+import { UpdateResult } from 'typeorm';
 
 @Injectable()
 export class PostService {
@@ -69,10 +69,6 @@ export class PostService {
     return `This action returns all post`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
-  }
-
   async update(postId: string, userId: string, updatePostData: UpdatePostDto) {
     const updateDtoFields: string[] = Object.keys(updatePostData);
     if (updateDtoFields.length === 0) {
@@ -124,7 +120,20 @@ export class PostService {
     };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async ban(postId: string) {
+    const foundPost: Post | null =
+      await this.postRepository.findOneNotInactive(postId);
+    if (!foundPost) {
+      throw new BadRequestException('El Post no existe o ya está inactivo');
+    }
+    const banResult: UpdateResult = await this.postRepository.ban(postId);
+    if (banResult.affected === 0) {
+      throw new InternalServerErrorException(
+        'No se pudo inacivar el post indicado',
+      );
+    }
+    return {
+      message: `El post con id ${postId} se inactivo correctamente`,
+    };
   }
 }

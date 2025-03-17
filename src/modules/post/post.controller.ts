@@ -56,13 +56,10 @@ export class PostController {
     return this.postService.approve(postId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postService.findOne(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postService.remove(+id);
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('ban/:id')
+  async ban(@Param('id', ParseUUIDPipe) postId: string) {
+    return this.postService.ban(postId);
   }
 }

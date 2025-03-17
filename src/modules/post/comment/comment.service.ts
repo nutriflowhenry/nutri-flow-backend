@@ -53,6 +53,14 @@ export class CommentService {
   }
 
   async findAllByPost(postId: string, paginationData: GetCommentDto) {
+    const foundActivePost: Post | null =
+      await this.postService.findOneActive(postId);
+    if (!foundActivePost) {
+      throw new NotFoundException(
+        `El post con id ${postId} no existe o no está activo`,
+      );
+    }
+
     const { page, limit } = paginationData;
     const [comments, commentCount] = await this.commentRepository.findAllByPost(
       postId,
