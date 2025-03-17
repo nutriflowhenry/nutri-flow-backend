@@ -19,6 +19,7 @@ export class StripeController {
     const event = req['stripeEvent'] as Stripe.Event;
     switch (event.type) {
       case 'customer.subscription.created': {
+        console.log('###Llegó a create');
         await this.paymentService.registerPayment(event.data.object);
         break;
       }

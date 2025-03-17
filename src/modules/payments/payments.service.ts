@@ -107,6 +107,7 @@ export class PaymentsService {
       await this.paymentRepository.findOneByStripeId(paymentData.id);
     if (!localRegisterPayment) {
       const stripeCustomerId: string = paymentData.customer.toString();
+      console.log(stripeCustomerId);
       const user: User =
         await this.userService.findByStripeId(stripeCustomerId);
       const isAvalidateStatus: boolean = Object.keys(
