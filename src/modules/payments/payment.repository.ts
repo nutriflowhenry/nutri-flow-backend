@@ -9,26 +9,33 @@ import { SubscriptionStatus } from './enums/suscriptionStatus.enum';
 @Injectable()
 export class PaymentRepository {
   constructor(
-    @InjectRepository(Payment) private PaymentRepository: Repository<Payment>,
+    @InjectRepository(Payment) private paymentRepository: Repository<Payment>,
   ) {}
 
   async findOneByStripeId(paymentStripeId: string): Promise<Payment> {
-    return this.PaymentRepository.findOne({
+    return this.paymentRepository.findOne({
       where: { stripeSubscriptionId: paymentStripeId },
     });
   }
 
   async create(paymentdata: CreatePaymentDto): Promise<Payment> {
-    const newPayment: Payment = this.PaymentRepository.create(paymentdata);
-    return this.PaymentRepository.save(newPayment);
+    const newPayment: Payment = this.paymentRepository.create(paymentdata);
+    return this.paymentRepository.save(newPayment);
   }
 
   async update(paymentId: string, updateData: UpdatePaymentDto): Promise<void> {
-    await this.PaymentRepository.update(paymentId, updateData);
+    await this.paymentRepository.update(paymentId, updateData);
+  }
+
+  async upsert(id: string, paymentData: CreatePaymentDto) {
+    const result = await this.paymentRepository.upsert(paymentData, [
+      'stripeSubscriptionId',
+    ]);
+    return this.findOneByStripeId(id);
   }
 
   async findActiveByUser(userId: string): Promise<Payment | null> {
-    return await this.PaymentRepository.findOne({
+    return await this.paymentRepository.findOne({
       where: {
         user: { id: userId },
         status: SubscriptionStatus.ACTIVE,
@@ -37,7 +44,7 @@ export class PaymentRepository {
   }
 
   async finAllByUser(userId: string, limit: number, page: number) {
-    const [results, total] = await this.PaymentRepository.findAndCount({
+    const [results, total] = await this.paymentRepository.findAndCount({
       where: {
         user: { id: userId },
       },
@@ -56,21 +63,21 @@ export class PaymentRepository {
   }
 
   async findAll(skip: number, limit: number): Promise<[Payment[], number]> {
-    const result: [Payment[], number] =
-      await this.PaymentRepository.createQueryBuilder('payment')
-        .leftJoinAndSelect('payment.user', 'user')
-        .select([
-          'payment',
-          'user.id',
-          'user.name',
-          'user.subscriptionType',
-          'user.isActive',
-        ])
-        .orderBy('payment.created_at', 'DESC')
-        .addOrderBy('payment.id', 'ASC')
-        .skip(skip)
-        .take(limit)
-        .getManyAndCount();
+    const result: [Payment[], number] = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .leftJoinAndSelect('payment.user', 'user')
+      .select([
+        'payment',
+        'user.id',
+        'user.name',
+        'user.subscriptionType',
+        'user.isActive',
+      ])
+      .orderBy('payment.created_at', 'DESC')
+      .addOrderBy('payment.id', 'ASC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
     return result;
   }
 }
