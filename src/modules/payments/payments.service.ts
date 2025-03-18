@@ -150,6 +150,7 @@ export class PaymentsService {
       currentPeriodStart: new Date(paymentData.current_period_start * 1000),
       currentPeriodEnd: new Date(paymentData.current_period_end * 1000),
     };
+    console.log(createPaymentData.status);
     const payment: Payment = await this.paymentRepository.upsert(
       paymentData.id,
       createPaymentData,
