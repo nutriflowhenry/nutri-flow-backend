@@ -106,6 +106,8 @@ export class PaymentsService {
     console.log('### Se inició el registro');
     const localRegisterPayment: Payment | null =
       await this.paymentRepository.findOneByStripeId(paymentData.id);
+    console.log(`## registro local:${localRegisterPayment}`);
+
     if (!localRegisterPayment) {
       const stripeCustomerId: string = paymentData.customer.toString();
       const user: User =
@@ -138,6 +140,7 @@ export class PaymentsService {
   async updatePayment(paymentData: Stripe.Subscription) {
     const payment: Payment | null =
       await this.paymentRepository.findOneByStripeId(paymentData.id);
+    console.log(`## registro local:${payment}`);
     if (!payment) {
       console.log('### Llegó a actualización y aún no existia');
       const registerPayment: Payment = await this.registerPayment(paymentData);

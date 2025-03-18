@@ -18,11 +18,7 @@ export class StripeController {
   async handleWebhook(@Req() req: RawBodyRequest<Request>) {
     const event = req['stripeEvent'] as Stripe.Event;
     switch (event.type) {
-      case 'customer.subscription.created': {
-        console.log('###Llegó a create');
-        await this.paymentService.registerPayment(event.data.object);
-        break;
-      }
+      case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         console.log('Llegó a update');
         await this.paymentService.updatePayment(event.data.object);
