@@ -19,52 +19,54 @@ import { StripeWebhookMiddleware } from './modules/stripe/middleware/stripe.midd
 import { EmailModule } from './modules/email/email.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EmitterModule } from './modules/emitters/emitter.module';
+import { ChatbotModule } from './modules/chatbot/chatbot.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [typeOrmConfig],
-    }),
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) =>
-        configService.get('typeorm'),
-    }),
-    JwtModule.register({
-      global: true,
-      signOptions: { expiresIn: '1h' },
-      secret: process.env.JWT_SECRET,
-    }),
-    S3Module.forRootAsync({
-      useFactory: () => ({
-        config: {
-          credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-          },
-          region: process.env.AWS_REGION,
-        },
-      }),
-    }),
-    EventEmitterModule.forRoot(),
-    EmitterModule,
-    AuthModule,
-    UsersModule,
-    FoodTrackerModule,
-    UserProfilesModule,
-    WaterTrackerModule,
-    ImagesModule,
-    AwsModule,
-    StripeModule,
-    PaymentsModule,
-    EmailModule,
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            load: [typeOrmConfig],
+        }),
+        TypeOrmModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) =>
+                configService.get('typeorm'),
+        }),
+        JwtModule.register({
+            global: true,
+            signOptions: { expiresIn: '1h' },
+            secret: process.env.JWT_SECRET,
+        }),
+        S3Module.forRootAsync({
+            useFactory: () => ({
+                config: {
+                    credentials: {
+                        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+                        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+                    },
+                    region: process.env.AWS_REGION,
+                },
+            }),
+        }),
+        EventEmitterModule.forRoot(),
+        EmitterModule,
+        AuthModule,
+        UsersModule,
+        FoodTrackerModule,
+        UserProfilesModule,
+        WaterTrackerModule,
+        ImagesModule,
+        AwsModule,
+        ChatbotModule,
+        StripeModule,
+        PaymentsModule,
+        EmailModule,
+    ],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(StripeWebhookMiddleware).forRoutes('stripe/webhook');
-  }
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(StripeWebhookMiddleware).forRoutes('stripe/webhook');
+    }
 }

@@ -37,13 +37,14 @@ export class UsersService {
 
 
     async findById(id: string): Promise<User> {
-        return this.usersRepository.findById(id);
+        const user = await this.usersRepository.findById(id);
+        if (!user) throw new NotFoundException(`User with id ${id} not found`);
+        return user;
     }
 
 
     async findOne(id: string): Promise<PublicUserDto> {
-        const user = await this.usersRepository.findById(id);
-        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+        const user = await this.findById(id);
 
         if (user?.profilePicture) {
             user.profilePicture = await this.cloudFrontService.generateSignedUrl(user.profilePicture);
@@ -54,8 +55,7 @@ export class UsersService {
 
 
     async update(id: string, updateData: UpdateUserDto): Promise<PublicUserDto> {
-        const user = await this.usersRepository.findById(id);
-        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+        await this.findById(id);
 
         const updatedUser = await this.usersRepository.update(id, updateData);
         return plainToInstance(PublicUserDto, updatedUser);
@@ -63,26 +63,26 @@ export class UsersService {
 
 
     async deactivateAccount(id: string): Promise<void> {
-        const user = await this.usersRepository.findById(id);
-        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-
-        if (!user.isActive) {
-            throw new ConflictException(`User with ID ${id} is already deactivated`);
-        }
+        const user = await this.findById(id);
+        if (!user.isActive) throw new ConflictException(`User with ID ${id} is already deactivated`);
 
         await this.usersRepository.deactivateUser(id);
     }
 
 
     async banUser(id: string): Promise<void> {
-        const user = await this.usersRepository.findById(id);
-        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-
-        if (!user.isActive) {
-            throw new ConflictException(`User with ID ${id} is already deactivated`);
-        }
+        const user = await this.findById(id);
+        if (!user.isActive) throw new ConflictException(`User with ID ${id} is already deactivated`);
 
         await this.usersRepository.banUser(id);
+    }
+
+
+    async unbanUser(id: string): Promise<void> {
+        const user = await this.findById(id);
+        if (user.isActive) throw new ConflictException(`User with ID ${id} is active`);
+
+        await this.usersRepository.unbanUser(id);
     }
 
 
@@ -139,7 +139,6 @@ export class UsersService {
     async updateSubscriptionType(userId: string): Promise<void> {
         return this.usersRepository.updateSubscriptionType(userId);
     }
-
 
     async downgradeSubscriptionType(userId: string): Promise<void> {
         return this.usersRepository.downgradeSubscriptionType(userId);
