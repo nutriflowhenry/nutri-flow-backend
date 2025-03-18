@@ -10,7 +10,6 @@ import { GetPaymentDto } from './dto/get-payment.dto';
 import { SubscriptionStatus } from './enums/suscriptionStatus.enum';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { TypedEventEmitter } from '../emitters/typed-event-emitter.class';
-import { Subscribable, Subscription } from 'rxjs';
 
 @Injectable()
 export class PaymentsService {
