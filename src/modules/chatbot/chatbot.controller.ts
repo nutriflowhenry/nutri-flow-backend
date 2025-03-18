@@ -7,15 +7,15 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 @Controller('chatbot')
 export class ChatbotController {
 
-    constructor(private readonly chatbotService: ChatbotService) {
-    }
+   constructor(private readonly chatbotService: ChatbotService) {
+   }
 
-    @Post('chat-completion')
-    @UseGuards(AuthGuard)
-    async createChatCompletion(
-        @Req() request: Request & { user: { sub: string } },
-        @Body() body: CreateChatCompletionDto) {
-        const requesterId = request.user.sub;
-        return this.chatbotService.createChatCompletion(requesterId, body.messages);
-    };
+   @Post('chat-completion')
+   @UseGuards(AuthGuard)
+   async createChatCompletion(
+       @Req() request: Request & { user: { sub: string } },
+       @Body() body: CreateChatCompletionDto) {
+      const requesterId = request.user.sub;
+      return this.chatbotService.createChatCompletion(requesterId, body.messages);
+   };
 }
