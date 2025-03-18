@@ -21,6 +21,7 @@ import { EmailModule } from './modules/email/email.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EmitterModule } from './modules/emitters/emitter.module';
 import { CommentModule } from './modules/post/comment/comment.module';
+import { ChatbotModule } from './modules/chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { CommentModule } from './modules/post/comment/comment.module';
     WaterTrackerModule,
     ImagesModule,
     AwsModule,
+    ChatbotModule,
     StripeModule,
     PaymentsModule,
     EmailModule,

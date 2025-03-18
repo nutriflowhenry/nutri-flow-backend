@@ -90,6 +90,13 @@ export class UsersRepository {
     }
 
 
+    async unbanUser(id: string): Promise<void> {
+        await this.repository.update(id, { isActive: true });
+        console.log(`User with ID ${id} has been unbanned`);
+
+    }
+
+
     async checkIfAdminExists(): Promise<boolean> {
         const admin = await this.repository.findOneBy({ role: Role.ADMIN });
         return !!admin;
@@ -114,7 +121,6 @@ export class UsersRepository {
             subscriptionType: SubscriptionType.PREMIUM,
         });
     }
-
 
     async downgradeSubscriptionType(userId: string): Promise<void> {
         await this.repository.update(userId, {
