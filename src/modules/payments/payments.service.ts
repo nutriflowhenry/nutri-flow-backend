@@ -137,63 +137,33 @@ export class PaymentsService {
     }
   }
 
-  async updatePayment(paymentData: Stripe.Subscription) {
-    const payment: Payment | null =
-      await this.paymentRepository.findOneByStripeId(paymentData.id);
-    console.log(`## registro local:${payment}`);
-    if (!payment) {
-      console.log('### Llegó a actualización y aún no existia');
-      const registerPayment: Payment = await this.registerPayment(paymentData);
-      if (registerPayment.status === SubscriptionStatus.ACTIVE) {
-        await this.userService.updateSubscriptionType(registerPayment.user.id);
-        const user: User = await this.userService.findById(
-          registerPayment.user.id,
-        );
-        this.typedEventEmitter.emitAsync('premium.subscription.created', {
-          email: user.email,
-          name: user.name,
-          subscription: registerPayment,
-        });
-        console.log('Se registró porqué no existia');
-      }
-    } else if (payment) {
-      const stripeCustomerId: string = paymentData.customer.toString();
-      const user: User =
-        await this.userService.findByStripeId(stripeCustomerId);
-      const isAvalidateStatus: boolean = Object.keys(
-        SubscriptionStatus,
-      ).includes(paymentData.status.toUpperCase());
-      let statusEnum: SubscriptionStatus;
-      console.log('#### Actualización');
-      console.log(paymentData);
-      if (isAvalidateStatus) {
-        const statusString: string =
-          paymentData.status.toUpperCase() as keyof typeof SubscriptionStatus;
-        statusEnum = SubscriptionStatus[statusString];
-      } else {
-        statusEnum = SubscriptionStatus.UNEXPECTED;
-      }
-      const updateData: UpdatePaymentDto = {
-        status: SubscriptionStatus.ACTIVE,
-        currentPeriodStart: new Date(paymentData.current_period_start * 1000),
-        currentPeriodEnd: new Date(paymentData.current_period_end * 1000),
-      };
-      await this.paymentRepository.update(payment.id, updateData);
+  async upsertPayment(paymentData: Stripe.Subscription) {
+    const stripeCustomerId: string = paymentData.customer.toString();
+    const user: User = await this.userService.findByStripeId(stripeCustomerId);
+    const validatedStatus: SubscriptionStatus = this.mapStripeStatus(
+      paymentData.status,
+    );
+    const createPaymentData: CreatePaymentDto = {
+      status: validatedStatus,
+      stripeSubscriptionId: paymentData.id,
+      user,
+      currentPeriodStart: new Date(paymentData.current_period_start * 1000),
+      currentPeriodEnd: new Date(paymentData.current_period_end * 1000),
+    };
+    const payment: Payment = await this.paymentRepository.upsert(
+      paymentData.id,
+      createPaymentData,
+    );
+
+    if (payment.status === SubscriptionStatus.ACTIVE) {
       await this.userService.updateSubscriptionType(user.id);
-      // } else if (payment) {
-      //   const newStatus: boolean = paymentData.status !== 'active' ? false : true;
-      //   await this.paymentRepository.update(payment.id, {
-      //     isActive: newStatus,
-      //   });
-      //   if (!newStatus) {
-      //     const stripeCustomerId: string =
-      //       typeof paymentData.customer === 'string'
-      //         ? paymentData.customer
-      //         : paymentData.customer.id;
-      //     const user: User =
-      //       await this.userService.findByStripeId(stripeCustomerId);
-      //     this.userService.downgradeSubscriptionType(user.id);
-      //   }
+      this.typedEventEmitter.emitAsync('premium.subscription.created', {
+        email: user.email,
+        name: user.name,
+        subscription: payment,
+      });
+    } else {
+      await this.userService.downgradeSubscriptionType(user.id);
     }
   }
 
@@ -235,5 +205,11 @@ export class PaymentsService {
         await this.paymentRepository.update(payment.id, updateData);
       }
     }
+  }
+
+  private mapStripeStatus(stripeStatus: string): SubscriptionStatus {
+    const statusKey =
+      stripeStatus.toUpperCase() as keyof typeof SubscriptionStatus;
+    return SubscriptionStatus[statusKey] || SubscriptionStatus.UNEXPECTED;
   }
 }

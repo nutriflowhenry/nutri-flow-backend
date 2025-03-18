@@ -21,7 +21,7 @@ export class StripeController {
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         console.log('Llegó a update');
-        await this.paymentService.updatePayment(event.data.object);
+        await this.paymentService.upsertPayment(event.data.object);
         break;
       }
       case 'customer.subscription.deleted': {
