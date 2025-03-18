@@ -36,6 +36,10 @@ export class StripeController {
         );
         break;
       }
+      case 'invoice.payment_failed': {
+        await this.paymentService.handleInvoicePaymentFailed(event.data.object);
+        break;
+      }
       default: {
         console.log(`Evento del tipo ${event.type}, no manejado`);
       }

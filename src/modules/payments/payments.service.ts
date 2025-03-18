@@ -10,6 +10,7 @@ import { GetPaymentDto } from './dto/get-payment.dto';
 import { SubscriptionStatus } from './enums/suscriptionStatus.enum';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { TypedEventEmitter } from '../emitters/typed-event-emitter.class';
+import { Subscribable, Subscription } from 'rxjs';
 
 @Injectable()
 export class PaymentsService {
@@ -164,7 +165,11 @@ export class PaymentsService {
         subscription: payment,
       });
     } else {
-      await this.userService.downgradeSubscriptionType(user.id);
+      const activeSuscription: Payment =
+        await this.paymentRepository.findActiveByUser(user.id);
+      if (!activeSuscription) {
+        await this.userService.downgradeSubscriptionType(user.id);
+      }
     }
   }
 
@@ -205,6 +210,39 @@ export class PaymentsService {
         };
         await this.paymentRepository.update(payment.id, updateData);
       }
+    }
+  }
+
+  async handleInvoicePaymentFailed(invoiceObject: Stripe.Invoice) {
+    if (invoiceObject.subscription) {
+      const subscriptionStripeId: string =
+        invoiceObject.subscription.toString();
+      const subscriptionStripeData: Stripe.Subscription =
+        await this.stripeService.getSuscriptionData(subscriptionStripeId);
+
+      const stripeCustomerId: string =
+        subscriptionStripeData.customer.toString();
+      const user: User =
+        await this.userService.findByStripeId(stripeCustomerId);
+      const validatedStatus: SubscriptionStatus = this.mapStripeStatus(
+        subscriptionStripeData.status,
+      );
+      const createPaymentData: CreatePaymentDto = {
+        status: validatedStatus,
+        stripeSubscriptionId: subscriptionStripeData.id,
+        user,
+        currentPeriodStart: new Date(
+          subscriptionStripeData.current_period_start * 1000,
+        ),
+        currentPeriodEnd: new Date(
+          subscriptionStripeData.current_period_end * 1000,
+        ),
+      };
+      console.log(createPaymentData.status);
+      const payment: Payment = await this.paymentRepository.upsert(
+        subscriptionStripeData.id,
+        createPaymentData,
+      );
     }
   }
 
