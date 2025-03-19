@@ -10,7 +10,7 @@ export class ChatbotService {
 
    constructor(private readonly openai: OpenAI) {
    }
-   
+
    async createChatCompletion(userId: string, messages: ChatCompletionMessageDto[]) {
       if (!this.userSessions.has(userId)) {
          this.userSessions.set(userId, []);
@@ -23,12 +23,16 @@ export class ChatbotService {
           await this.openai.chat.completions.create({
              model: 'gpt-4o-mini',
              messages: [
-                { role: 'system', content: 'You are a nutritionist providing diet advice' },
+                {
+                   role: 'system',
+                   content: 'You are a nutritionist. Before giving advice, ask relevant questions (e.g., weight, height, activity level). Keep responses as concise as possible while remaining helpful'
+                },
                 ...userConversation as OpenAI.Chat.Completions.ChatCompletionMessage[],
              ],
           });
 
       userConversation.push(response.choices[0].message);
+      console.log(response.choices[0].message);
       return response.choices[0].message;
 
    }
