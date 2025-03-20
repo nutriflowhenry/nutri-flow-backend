@@ -100,6 +100,8 @@ export class UsersController {
 
 
     @Put(':userId/profile-picture')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthGuard)
     async updateProfilePicture(
         @Param('userId') userId: string,
         @Body('fileType') fileType: string,): Promise<object> {

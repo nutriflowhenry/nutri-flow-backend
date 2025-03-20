@@ -32,7 +32,6 @@ export class ChatbotService {
           });
 
       userConversation.push(response.choices[0].message);
-      console.log(response.choices[0].message);
       return response.choices[0].message;
 
    }
