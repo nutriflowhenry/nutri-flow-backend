@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { FoodTrackerService } from '../food-tracker/food-tracker.service';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 
 @Controller('upload')
@@ -12,6 +13,7 @@ export class ImagesController {
     }
 
     @Get('profile/upload-url/:userId')
+    @UseGuards(AuthGuard)
     async getProfileUploadUrl(
         @Param('userId') userId: string,
         @Query('type') fileType: string): Promise<{ uploadUrl: string }> {
@@ -21,6 +23,7 @@ export class ImagesController {
 
 
     @Get('meal/upload-url/:foodTrackerId')
+    @UseGuards(AuthGuard)
     async getMealUploadUrl(
         @Param('foodTrackerId') foodTrackerId: string,
         @Query('type') fileType: string,): Promise<{ uploadUrl: string }> {
