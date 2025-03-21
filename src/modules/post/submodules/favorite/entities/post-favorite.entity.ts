@@ -1,13 +1,13 @@
-// src/entities/favorite.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   ManyToOne,
   Unique,
+  Column,
 } from 'typeorm';
 import { User } from 'src/modules/users/entities/user.entity';
-import { Post } from './post.entity';
+import { Post } from '../../../entities/post.entity';
 
 @Entity()
 @Unique(['user', 'post'])
@@ -29,4 +29,7 @@ export class PostFavorite {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
 }

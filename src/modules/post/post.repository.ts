@@ -31,21 +31,20 @@ export class PostRepository {
     });
   }
 
-  async findOneActive(postId: string): Promise<Post | null> {
+  async findOneApproved(postId: string): Promise<Post | null> {
     return await this.postRepository.findOne({
       where: { id: postId, status: PostStatus.APPROVED },
     });
   }
 
-  async findAllActive(
-    status: PostStatus,
-    getPostData: GetPostDto,
-  ): Promise<[Post[], number]> {
-    const { limit, page, searchOnTitle, tags } = getPostData;
+  async findAll(getPostData: GetPostDto): Promise<[Post[], number]> {
+    const { limit, page, searchOnTitle, tags, status } = getPostData;
     const skip: number = (page - 1) * limit;
     const postQueryBuilder: SelectQueryBuilder<Post> =
       this.postRepository.createQueryBuilder('post');
-    postQueryBuilder.where('post.status = :status', { status });
+    if (status) {
+      postQueryBuilder.where('post.status = :status', { status });
+    }
     if (tags?.length > 0) {
       postQueryBuilder.andWhere('post.tags IN (:...tags)', { tags });
     }
@@ -58,7 +57,7 @@ export class PostRepository {
       .orderBy('post.createdAt', 'DESC')
       .addOrderBy('post.id', 'ASC')
       .skip(skip)
-      .limit(limit)
+      .take(limit)
       .getManyAndCount();
   }
 
@@ -86,7 +85,7 @@ export class PostRepository {
 
   async approve(id: string): Promise<Post> {
     await this.postRepository.update(id, { status: PostStatus.APPROVED });
-    return this.findOneActive(id);
+    return this.findOneApproved(id);
   }
 
   async findOneNotInactive(id: string): Promise<Post | null> {

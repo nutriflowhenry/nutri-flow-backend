@@ -5,9 +5,10 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { Post } from './post.entity';
+
 import { User } from 'src/modules/users/entities/user.entity';
-import { PostReactionType } from '../enums/post-reaction.enum';
+import { Post } from 'src/modules/post/entities/post.entity';
+import { PostReactionType } from 'src/modules/post/enums/post-reaction.enum';
 
 @Entity()
 @Unique(['user', 'post'])
@@ -21,6 +22,9 @@ export class PostReaction {
     default: PostReactionType.LIKE,
   })
   type: PostReactionType;
+
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
 
   @ManyToOne(() => User, {
     nullable: false,

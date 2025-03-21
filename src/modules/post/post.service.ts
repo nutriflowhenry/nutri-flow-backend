@@ -38,35 +38,20 @@ export class PostService {
   }
 
   async getAllActive(getPostData: GetPostDto) {
-    const status: PostStatus = PostStatus.APPROVED;
-    const [posts, postCount] = await this.postRepository.findAllActive(
-      status,
-      getPostData,
-    );
-    const totalPages: number = Math.ceil(postCount / getPostData.limit);
+    getPostData.status = PostStatus.APPROVED;
+    return this.getBase(getPostData);
+  }
 
-    return {
-      message: `Se obtuvieron correctamente los Post activos (aprobados), página actual: ${getPostData.page}, número máximo de Post por página ${getPostData.limit}`,
-      posts,
-      pagination: {
-        page: getPostData.page,
-        limit: getPostData.limit,
-        postCount,
-        totalPages,
-      },
-    };
+  async getAll(getPostData: GetPostDto) {
+    return this.getBase(getPostData);
   }
 
   async findOneById(id: string) {
     return this.postRepository.findOneById(id);
   }
 
-  async findOneActive(id: string) {
-    return this.postRepository.findOneActive(id);
-  }
-
-  findAll() {
-    return `This action returns all post`;
+  async findOneApproved(id: string) {
+    return this.postRepository.findOneApproved(id);
   }
 
   async update(postId: string, userId: string, updatePostData: UpdatePostDto) {
@@ -110,7 +95,7 @@ export class PostService {
     if (!foundPost) {
       throw new ForbiddenException('El post indicado no existe');
     }
-    if (foundPost.status !== PostStatus.PENDING) {
+    if (foundPost.status === PostStatus.APPROVED) {
       throw new BadRequestException('El post ya está aprobado');
     }
     const approvedPost: Post = await this.postRepository.approve(id);
@@ -134,6 +119,22 @@ export class PostService {
     }
     return {
       message: `El post con id ${postId} se inactivo correctamente`,
+    };
+  }
+
+  private async getBase(getPostData: GetPostDto) {
+    const [posts, postCount] = await this.postRepository.findAll(getPostData);
+    const totalPages: number = Math.ceil(postCount / getPostData.limit);
+
+    return {
+      message: `Se obtuvieron correctamente los Post activos (aprobados), página actual: ${getPostData.page}, número máximo de Post por página ${getPostData.limit}`,
+      posts,
+      pagination: {
+        page: getPostData.page,
+        limit: getPostData.limit,
+        postCount,
+        totalPages,
+      },
     };
   }
 }

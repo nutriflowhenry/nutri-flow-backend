@@ -33,6 +33,13 @@ export class PostController {
     return this.postService.createPost(req.user.sub, createPostDto);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('all')
+  async getAll(@Query() getPostData: GetPostDto) {
+    return this.postService.getAll(getPostData);
+  }
+
   @UseGuards(AuthGuard)
   @Get('allActive')
   async getAllActive(@Query() getPostData: GetPostDto) {
@@ -40,7 +47,7 @@ export class PostController {
   }
 
   @UseGuards(AuthGuard)
-  @Patch(':id')
+  @Patch('update/:id')
   async update(
     @Param('id', ParseUUIDPipe) postId: string,
     @Body() updatePostDto: UpdatePostDto,
