@@ -24,7 +24,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'https://nutri-flow-henry.vercel.app/',
+    origin: ['http://localhost:3000', 'https://nutri-flow-henry.vercel.app'],
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
     methods: 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
