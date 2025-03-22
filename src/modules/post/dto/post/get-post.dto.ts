@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { Tag } from '../../enums/tag.enum';
 import { Transform, Type } from 'class-transformer';
+import { PostStatus } from '../../enums/post-status.enum';
 
 export class GetPostDto {
   @IsOptional()
@@ -21,6 +22,9 @@ export class GetPostDto {
   @Min(1)
   @Type(() => Number)
   limit = 10;
+  @IsOptional()
+  @IsEnum(PostStatus)
+  status?: PostStatus;
   @IsOptional()
   @IsArray()
   @IsEnum(Tag, { each: true })

@@ -23,9 +23,10 @@ export class CreatePostDto {
   @Length(10, 200) // Para pruebas
   content: string;
 
+  @IsOptional()
   @IsArray()
   @IsEnum(Tag, { each: true })
-  tags: Tag[];
+  tags?: Tag[];
 
   @IsOptional()
   @IsArray()

@@ -5,8 +5,8 @@ import { Repository } from 'typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-commnet.dto';
 import { User } from 'src/modules/users/entities/user.entity';
-import { Post } from '../entities/post.entity';
-import { PostStatus } from '../enums/post-status.enum';
+import { Post } from '../../entities/post.entity';
+import { PostStatus } from '../../enums/post-status.enum';
 
 @Injectable()
 export class CommentRepository {
@@ -37,7 +37,19 @@ export class CommentRepository {
     });
   }
 
-  findAllByPost(
+  async findByIdAndPost(
+    postId: string,
+    commentId: string,
+  ): Promise<Comment | null> {
+    return this.postCommentRepository.findOne({
+      where: {
+        id: commentId,
+        post: { id: postId },
+      },
+    });
+  }
+
+  async findAllByPost(
     postId: string,
     page: number,
     limit: number,

@@ -5,9 +5,9 @@ import {
 } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UsersService } from 'src/modules/users/users.service';
-import { Post } from '../entities/post.entity';
+import { Post } from '../../entities/post.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import { PostService } from '../post.service';
+import { PostService } from '../../post.service';
 import { Comment } from './entities/comment.entity';
 import { CommentRepository } from './comment.repository';
 import { UpdateCommentDto } from './dto/update-commnet.dto';
@@ -26,7 +26,7 @@ export class CommentService {
     userId: string,
     createCommentData: CreateCommentDto,
   ) {
-    const foundPost: Post = await this.postService.findOneActive(postId);
+    const foundPost: Post = await this.postService.findOneApproved(postId);
     const foundUser: User = await this.userservice.findById(userId);
     if (!foundPost) {
       throw new NotFoundException('El post indicaco no existe');
@@ -54,7 +54,7 @@ export class CommentService {
 
   async findAllByPost(postId: string, paginationData: GetCommentDto) {
     const foundActivePost: Post | null =
-      await this.postService.findOneActive(postId);
+      await this.postService.findOneApproved(postId);
     if (!foundActivePost) {
       throw new NotFoundException(
         `El post con id ${postId} no existe o no está activo`,
@@ -72,7 +72,7 @@ export class CommentService {
 
     return {
       message: `Comentarios obtenidos exitosamente para el post ${postId}, página actual: ${page}, elementos máximos por página: ${limit}`,
-      data: comments,
+      comments,
       pagination: {
         page,
         limit,
@@ -139,6 +139,20 @@ export class CommentService {
 
     return {
       message: `El comentario con id ${commentId} se eliminó con éxito`,
+    };
+  }
+
+  async removeByAdmin(postId: string, commentId: string) {
+    const foundComment: Comment = await this.commentRepository.findByIdAndPost(
+      postId,
+      commentId,
+    );
+    if (!foundComment) {
+      throw new NotFoundException('El comentario indicado no existe');
+    }
+    await this.commentRepository.delete(foundComment.id);
+    return {
+      message: `El comentario con id ${foundComment.id} se borró exitosamente`,
     };
   }
 }
