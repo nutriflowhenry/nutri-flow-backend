@@ -14,9 +14,9 @@ import { AuthProvider } from '../enums/auth-provider.enum';
 import { Role } from '../../auth/enums/roles.enum';
 import { Payment } from '../../payments/entities/payment.entity';
 import { Post } from 'src/modules/post/entities/post.entity';
-import { Comment } from 'src/modules/post/comment/entities/comment.entity';
-import { PostReaction } from 'src/modules/post/entities/post-reaction.entity';
-import { PostFavorite } from 'src/modules/post/entities/post-favorite.entity';
+import { Comment } from 'src/modules/post/submodules/comment/entities/comment.entity';
+import { PostFavorite } from 'src/modules/post/submodules/favorite/entities/post-favorite.entity';
+import { PostReaction } from 'src/modules/post/submodules/reaction/entities/post-reaction.entity';
 
 @Entity({ name: 'users' })
 export class User {

@@ -10,11 +10,11 @@ import {
 } from 'typeorm';
 import { PostStatus } from '../enums/post-status.enum';
 import { PostImage } from './post-image.entity';
-import { PostReaction } from './post-reaction.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import { PostFavorite } from './post-favorite.entity';
+import { PostFavorite } from '../submodules/favorite/entities/post-favorite.entity';
 import { Tag } from '../enums/tag.enum';
-import { Comment } from '../comment/entities/comment.entity';
+import { Comment } from '../submodules/comment/entities/comment.entity';
+import { PostReaction } from '../submodules/reaction/entities/post-reaction.entity';
 
 @Entity({ name: 'posts' })
 export class Post {
@@ -33,7 +33,7 @@ export class Post {
     array: true,
     default: [],
   })
-  tags: Tag[];
+  tags?: Tag[];
 
   @Column({
     type: 'enum',
