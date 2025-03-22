@@ -1,0 +1,16 @@
+{
+  "AR": "America/Argentina/Buenos_Aires",
+  "BR": {
+    "default": "America/Sao_Paulo",
+    "exceptions": {
+      "Rio_Branco": "America/Rio_Branco",
+      "Manaus": "America/Manaus"
+    }
+  },
+  "CL": "America/Santiago",
+  "CO": "America/Bogota",
+  "PE": "America/Lima",
+  "UY": "America/Montevideo",
+  "PY": "America/Asuncion",
+  "EC": "America/Guayaquil"
+}
