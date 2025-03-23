@@ -42,6 +42,13 @@ export class UsersRepository {
     }
 
 
+    async findAllWithNotificationsEnabled(): Promise<User[]> {
+        return this.repository.find({
+            where: { notifications: true }
+        });
+    }
+
+
     async findById(id: string): Promise<User> {
         return this.repository.findOne({
             where: { id },
