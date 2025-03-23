@@ -1,4 +1,3 @@
-import { agent } from 'supertest';
 import { Gender } from '../enums/gender.enum';
 import { CalorieCalculateData } from '../interfaces/calorie-calculate-data.interface';
 import { ACTIVITY_CALORIE_MULTIPLIERS } from '../constants/activity-calorie-multipliers.constants';

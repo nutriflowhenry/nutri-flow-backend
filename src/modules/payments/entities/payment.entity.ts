@@ -13,7 +13,7 @@ export class Payment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   stripeSubscriptionId: string;
 
   @Column({

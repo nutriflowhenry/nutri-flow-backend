@@ -16,4 +16,24 @@ export class UpdateUserDto extends PartialType(CreateLocalUserDto) {
         description: 'Ruta que es empleada como clave para almacenamiento de archivos en S3'
     })
     profilePicture?: string;
+
+    @IsOptional()
+    @IsString()
+    country?: string;
+
+    @IsOptional()
+    @IsString()
+    city?: string;
+
+    @IsOptional()
+    @IsString()
+    phone?: string;
+
+    @IsOptional()
+    @IsString()
+    timeZone?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    notifications?: boolean;
 }

@@ -18,17 +18,12 @@ export class StripeController {
   async handleWebhook(@Req() req: RawBodyRequest<Request>) {
     const event = req['stripeEvent'] as Stripe.Event;
     switch (event.type) {
-      case 'customer.subscription.created': {
-        await this.paymentService.registerPayment(event.data.object);
-        break;
-      }
       case 'customer.subscription.updated': {
         console.log('Llegó a update');
-        await this.paymentService.updatePayment(event.data.object);
+        await this.paymentService.upsertPayment(event.data.object);
         break;
       }
       case 'customer.subscription.deleted': {
-        console.log('#####');
         console.log('Llegó a eliminación');
         await this.paymentService.subscriptiondowngrade(event.data.object);
         break;
@@ -37,6 +32,10 @@ export class StripeController {
         await this.paymentService.handleSubscriptionInvoicePaid(
           event.data.object,
         );
+        break;
+      }
+      case 'invoice.payment_failed': {
+        await this.paymentService.handleInvoicePaymentFailed(event.data.object);
         break;
       }
       default: {

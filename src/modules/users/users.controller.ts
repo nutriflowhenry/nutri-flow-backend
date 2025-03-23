@@ -90,7 +90,18 @@ export class UsersController {
     }
 
 
+    @Patch(':id/unban')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    unban(@Param('id') id: string): Promise<void> {
+        return this.usersService.unbanUser(id);
+    }
+
+
     @Put(':userId/profile-picture')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthGuard)
     async updateProfilePicture(
         @Param('userId') userId: string,
         @Body('fileType') fileType: string,): Promise<object> {

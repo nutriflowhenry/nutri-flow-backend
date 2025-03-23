@@ -9,6 +9,7 @@ import { FoodTrackerModule } from './modules/food-tracker/food-tracker.module';
 import typeOrmConfig from './config/typeOrm.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { PostModule } from './modules/post/post.module';
 import { S3Module } from 'nestjs-s3';
 import { UserProfilesModule } from './modules/user-profiles/user-profiles.module';
 import { ImagesModule } from './modules/images/images.module';
@@ -19,6 +20,10 @@ import { StripeWebhookMiddleware } from './modules/stripe/middleware/stripe.midd
 import { EmailModule } from './modules/email/email.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EmitterModule } from './modules/emitters/emitter.module';
+import { CommentModule } from './modules/post/submodules/comment/comment.module';
+import { ChatbotModule } from './modules/chatbot/chatbot.module';
+import { FavoriteModule } from './modules/post/submodules/favorite/favorite.module';
+import { ReactionModule } from './modules/post/submodules/reaction/reaction.module';
 
 @Module({
   imports: [
@@ -56,9 +61,14 @@ import { EmitterModule } from './modules/emitters/emitter.module';
     WaterTrackerModule,
     ImagesModule,
     AwsModule,
+    ChatbotModule,
     StripeModule,
     PaymentsModule,
     EmailModule,
+    PostModule,
+    CommentModule,
+    FavoriteModule,
+    ReactionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
