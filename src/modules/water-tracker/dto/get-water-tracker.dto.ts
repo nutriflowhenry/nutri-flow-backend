@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDateString,
   IsISO8601,
@@ -6,6 +7,13 @@ import {
 } from 'class-validator';
 
 export class GetWaterTrackerDto {
+  @ApiProperty({
+    description:
+      'Fecha de la cual se desea obtener los registros de consumo de agua, debe estar en formato ISO8601',
+    example: '2025-02-11',
+    required: false,
+    type: String,
+  })
   @IsISO8601(
     {},
     {
@@ -16,6 +24,12 @@ export class GetWaterTrackerDto {
   @IsOptional()
   date?: string;
 
+  @ApiProperty({
+    description: 'Zona horaria del usuario',
+    example: 'America/Mexico_City',
+    required: false,
+    type: String,
+  })
   @IsOptional()
   @IsTimeZone()
   timeZone?: string;
