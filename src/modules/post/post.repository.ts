@@ -37,11 +37,32 @@ export class PostRepository {
     });
   }
 
-  async findAll(getPostData: GetPostDto): Promise<[Post[], number]> {
+  async findAll(getPostData: GetPostDto): Promise<any> {
     const { limit, page, searchOnTitle, tags, status } = getPostData;
     const skip: number = (page - 1) * limit;
     const postQueryBuilder: SelectQueryBuilder<Post> =
       this.postRepository.createQueryBuilder('post');
+    postQueryBuilder
+      .leftJoinAndSelect('post.reactions', 'reactions')
+      .leftJoinAndSelect('reactions.user', 'userReaction')
+      .leftJoinAndSelect('post.author', 'author')
+      .select([
+        'post',
+        'author.id',
+        'author.name',
+        'author.profilePicture',
+        'reactions.id',
+        'reactions.type',
+        'userReaction.id',
+        'userReaction.name',
+        'userReaction.profilePicture',
+      ])
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(reaction.id)', 'reactionCount')
+          .from('post_reaction', 'reaction')
+          .where('reaction.postId = post.id');
+      }, 'reactionCount');
     if (status) {
       postQueryBuilder.where('post.status = :status', { status });
     }
@@ -53,12 +74,39 @@ export class PostRepository {
         search: `%${searchOnTitle}%`,
       });
     }
-    return postQueryBuilder
+    postQueryBuilder
       .orderBy('post.createdAt', 'DESC')
       .addOrderBy('post.id', 'ASC')
       .skip(skip)
-      .take(limit)
-      .getManyAndCount();
+      .take(limit);
+
+    const postRaw = await postQueryBuilder.getRawAndEntities();
+
+    const postWithCount = [];
+    for (let i = 0; i < postRaw.entities.length; i++) {
+      postWithCount.push({
+        ...postRaw.entities[i],
+        reactionCount: parseInt(postRaw.raw[i].reactionCount, 10),
+      });
+    }
+
+    const postQueryBuilderCount: SelectQueryBuilder<Post> =
+      this.postRepository.createQueryBuilder('post');
+    if (status) {
+      postQueryBuilderCount.where('post.status = :status', { status });
+    }
+    if (tags?.length > 0) {
+      postQueryBuilderCount.andWhere('post.tags IN (:...tags)', { tags });
+    }
+    if (searchOnTitle) {
+      postQueryBuilderCount.andWhere('post.title LIKE :search', {
+        search: `%${searchOnTitle}%`,
+      });
+    }
+
+    const total: number = await postQueryBuilderCount.getCount();
+
+    return [postWithCount, total];
   }
 
   async findByAuthorAndId(
