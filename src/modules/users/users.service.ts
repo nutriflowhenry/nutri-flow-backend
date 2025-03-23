@@ -8,6 +8,7 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { S3Service } from '../aws/s3-service';
 import { CloudFrontService } from '../aws/cloud-front.service';
 import axios from 'axios';
+import { TimeZoneService } from '../notifications/time-zone.service';
 
 
 @Injectable()
@@ -16,6 +17,7 @@ export class UsersService {
     constructor(
         private readonly cloudFrontService: CloudFrontService,
         private readonly usersRepository: UsersRepository,
+        private readonly timeZoneService: TimeZoneService,
         private readonly s3Service: S3Service) {
     }
 
@@ -33,6 +35,11 @@ export class UsersService {
         }));
 
         return plainToInstance(PublicUserDto, users);
+    }
+
+
+    async findAllUsersWithNotificationsEnabled(): Promise<User[]> {
+        return this.usersRepository.findAllWithNotificationsEnabled();
     }
 
 
@@ -56,6 +63,10 @@ export class UsersService {
 
     async update(id: string, updateData: UpdateUserDto): Promise<PublicUserDto> {
         await this.findById(id);
+
+        if (updateData?.country && updateData?.city) {
+            updateData.timeZone = this.timeZoneService.getTimeZone(updateData.country, updateData.city);
+        }
 
         const updatedUser = await this.usersRepository.update(id, updateData);
         return plainToInstance(PublicUserDto, updatedUser);
