@@ -52,6 +52,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "stripe": "^17.7.0",
+    "twilio": "^5.5.1",
     "typeorm": "^0.3.20"
   },
   "devDependencies": {
