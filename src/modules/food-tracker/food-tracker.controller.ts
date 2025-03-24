@@ -89,7 +89,7 @@ export class FoodTrackerController {
     async updateImage(
         @Req() req: { user: { sub: string } },
         @Param('foodTrackerId') foodTrackerId: string,
-        @Body('fileType') fileType: string,): Promise<object> {
+        @Body('fileType') fileType: string): Promise<object> {
         await this.foodTrackerService.updateMealImage(foodTrackerId, req.user.sub, fileType);
         return { message: 'Meal picture updated successfully' };
     }

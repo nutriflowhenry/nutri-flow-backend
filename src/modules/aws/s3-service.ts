@@ -9,7 +9,7 @@ export class S3Service {
     }
 
     async generateUploadUrl(
-        id: string, type: 'profile' | 'meal', fileType: string): Promise<string> {
+        id: string, type: 'profile' | 'meal' | 'post', fileType: string): Promise<string> {
 
         const filePath = `${type}-pictures/${id}.${fileType}`;
 
