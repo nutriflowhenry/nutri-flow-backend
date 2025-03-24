@@ -159,13 +159,13 @@ export class PostController {
   })
   @ApiQuery({
     type: String,
-    name: 'Tags',
+    name: 'tags',
     default: Tag.QUICK,
     required: false,
   })
   @ApiQuery({
     type: String,
-    name: 'SearchOnTitle',
+    name: 'searchOnTitle',
     required: false,
     example: 'Carnitas',
   })
