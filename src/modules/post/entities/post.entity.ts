@@ -38,7 +38,7 @@ export class Post {
     @Column({
         type: 'enum',
         enum: PostStatus,
-        default: PostStatus.PENDING,
+        default: PostStatus.APPROVED,
     })
     status: PostStatus;
 
