@@ -24,10 +24,12 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
 import { title } from 'process';
 import { Tag } from './enums/tag.enum';
+import { PostStatus } from './enums/post-status.enum';
 
 @Controller('post')
 export class PostController {
@@ -47,29 +49,13 @@ export class PostController {
       RegistroBásico: {
         value: {
           title: 'Carne asada al carbón',
-          content: `Ingredientes
-          1.5 kg de carne de res para asar (puede ser falda, arrachera o filete de res)
-          4 dientes de ajo picados
-          ...
-          Instrucciones
-          Preparar la marinada:
-          En un tazón grande, mezcla el jugo de naranja, jugo de limón, aceite de oliva, salsa de soja, ajo picado, comino, orégano, sal y pimienta. Revuelve bien para integrar todos los sabores.
-          ...
-          `,
+          content: 'Ingredientes...',
         },
       },
       RegistroConTags: {
         value: {
           title: 'Carne asada al carbón',
-          content: `Ingredientes
-          1.5 kg de carne de res para asar (puede ser falda, arrachera o filete de res)
-          4 dientes de ajo picados
-          ...
-          Instrucciones
-          Preparar la marinada:
-          En un tazón grande, mezcla el jugo de naranja, jugo de limón, aceite de oliva, salsa de soja, ajo picado, comino, orégano, sal y pimienta. Revuelve bien para integrar todos los sabores.
-          ...
-          `,
+          content: 'Ingredientes...',
           tags: [Tag.HIGHINPROTEIN],
         },
       },
@@ -77,7 +63,7 @@ export class PostController {
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Se creó con exito el registro de consumo de comida',
+    description: 'Se creó con exito el nuevo post',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -96,6 +82,45 @@ export class PostController {
     return this.postService.createPost(req.user.sub, createPostDto);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Devuelve todos los Post',
+    description:
+      'Requiere autenticación\n' +
+      'Sólo puede ser usado por un usuario administrador\n' +
+      '\nSe puede enviar por parametros de consulta los datos de paginación, limit y page, así como datos de clasificación, status y tags\n' +
+      '\nEn caso de exito retorna un mensaje y los datos de los post indicados',
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    default: 10,
+    required: false,
+  })
+  @ApiQuery({
+    type: Number,
+    name: 'page',
+    default: 1,
+    required: false,
+  })
+  @ApiQuery({
+    type: String,
+    name: 'status',
+    default: PostStatus.APPROVED,
+    required: false,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Se obtuvieron con exito los Post indicados',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autorización inválido o inexistente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'El usuario no existe',
+  })
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Get('all')
@@ -103,6 +128,57 @@ export class PostController {
     return this.postService.getAll(getPostData);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Devuelve todos los Post activos',
+    description:
+      'Requiere autenticación\n' +
+      'Permite obtener los Post que deben ser visibles a los usuarios\n' +
+      '\nSe puede enviar por parametros de consulta los datos de paginación, limit y page, así como datos de clasificación, status y tags, además de searchOnTitle para buscar texto en el título\n' +
+      '\nEn caso de exito retorna un mensaje y los datos de los post activos indicados',
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    default: 10,
+    required: false,
+  })
+  @ApiQuery({
+    type: Number,
+    name: 'page',
+    default: 1,
+    required: false,
+  })
+  @ApiQuery({
+    type: String,
+    name: 'status',
+    default: PostStatus.APPROVED,
+    required: false,
+  })
+  @ApiQuery({
+    type: String,
+    name: 'Tags',
+    default: Tag.QUICK,
+    required: false,
+  })
+  @ApiQuery({
+    type: String,
+    name: 'SearchOnTitle',
+    required: false,
+    example: 'Carnitas',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Se obtuvieron con exito los Post indicados',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autorización inválido o inexistente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'El usuario no existe',
+  })
   @UseGuards(AuthGuard)
   @Get('allActive')
   async getAllActive(@Query() getPostData: GetPostDto) {
