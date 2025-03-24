@@ -1,12 +1,12 @@
 import {
-  Entity,
-  Column,
-  ManyToOne,
-  OneToMany,
-  JoinColumn,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
+    Entity,
+    Column,
+    ManyToOne,
+    OneToMany,
+    JoinColumn,
+    PrimaryGeneratedColumn,
+    CreateDateColumn,
+    UpdateDateColumn,
 } from 'typeorm';
 import { PostStatus } from '../enums/post-status.enum';
 import { PostImage } from './post-image.entity';
@@ -18,58 +18,61 @@ import { PostReaction } from '../submodules/reaction/entities/post-reaction.enti
 
 @Entity({ name: 'posts' })
 export class Post {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-  @Column({ length: 120 })
-  title: string;
+    @Column({ length: 120 })
+    title: string;
 
-  @Column({ length: 5000 })
-  content: string;
+    @Column({ length: 5000 })
+    content: string;
 
-  @Column({
-    type: 'enum',
-    enum: Tag,
-    array: true,
-    default: [],
-  })
-  tags?: Tag[];
+    @Column({
+        type: 'enum',
+        enum: Tag,
+        array: true,
+        default: [],
+    })
+    tags?: Tag[];
 
-  @Column({
-    type: 'enum',
-    enum: PostStatus,
-    default: PostStatus.PENDING,
-  })
-  status: PostStatus;
+    @Column({
+        type: 'enum',
+        enum: PostStatus,
+        default: PostStatus.APPROVED,
+    })
+    status: PostStatus;
 
-  @OneToMany(() => PostImage, (postImage) => postImage.post, {
-    cascade: true,
-    nullable: true,
-  })
-  images?: PostImage[];
+    @Column({ nullable: true })
+    image: string;
 
-  @OneToMany(() => Comment, (postComment) => postComment.post, {
-    nullable: true,
-  })
-  comments?: Comment[];
+    // @OneToMany(() => PostImage, (postImage) => postImage.post, {
+    //   cascade: true,
+    //   nullable: true,
+    // })
+    // images?: PostImage[];
 
-  @OneToMany(() => PostReaction, (postReaction) => postReaction.post, {
-    nullable: true,
-  })
-  reactions?: PostReaction[];
+    @OneToMany(() => Comment, (postComment) => postComment.post, {
+        nullable: true,
+    })
+    comments?: Comment[];
 
-  @ManyToOne(() => User, (user) => user.posts, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'author_id' })
-  author: User;
+    @OneToMany(() => PostReaction, (postReaction) => postReaction.post, {
+        nullable: true,
+    })
+    reactions?: PostReaction[];
 
-  @OneToMany(() => PostFavorite, (postFavorite) => postFavorite.post, {
-    nullable: true,
-  })
-  favorites?: PostFavorite[];
+    @ManyToOne(() => User, (user) => user.posts, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'author_id' })
+    author: User;
 
-  @CreateDateColumn()
-  createdAt: Date;
+    @OneToMany(() => PostFavorite, (postFavorite) => postFavorite.post, {
+        nullable: true,
+    })
+    favorites?: PostFavorite[];
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 }

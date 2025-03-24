@@ -127,7 +127,7 @@ export class PostRepository {
     updatePostDto: UpdatePostDto,
   ): Promise<Post> {
     this.postRepository.merge(existingPost, updatePostDto);
-    existingPost.status = PostStatus.PENDING;
+    existingPost.status = PostStatus.APPROVED;
     return this.postRepository.save(existingPost);
   }
 
