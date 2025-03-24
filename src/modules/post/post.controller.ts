@@ -10,6 +10,7 @@ import {
   Req,
   ParseUUIDPipe,
   Query,
+  Put,
   HttpStatus,
 } from '@nestjs/common';
 import { PostService } from './post.service';
@@ -207,5 +208,16 @@ export class PostController {
   @Patch('ban/:id')
   async ban(@Param('id', ParseUUIDPipe) postId: string) {
     return this.postService.ban(postId);
+  }
+
+  @Put(':postId/image')
+  @UseGuards(AuthGuard)
+  async updateImage(
+    @Req() req: { user: { sub: string } },
+    @Param('postId') postId: string,
+    @Body('fileType') fileType: string,
+  ): Promise<object> {
+    await this.postService.updatePostImage(postId, req.user.sub, fileType);
+    return { message: 'Post image updated successfully' };
   }
 }

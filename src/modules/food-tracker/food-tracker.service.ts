@@ -193,10 +193,7 @@ export class FoodTrackerService {
         };
     }
 
-    async getImageUploadUrl(
-        foodTrackerId: string,
-        fileType: string,
-    ): Promise<string> {
+    async getImageUploadUrl(foodTrackerId: string, fileType: string): Promise<string> {
         return this.s3Service.generateUploadUrl(foodTrackerId, 'meal', fileType);
     }
 
