@@ -25,6 +25,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
@@ -186,6 +187,54 @@ export class PostController {
     return this.postService.getAllActive(getPostData);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Actualiza una publicación del foro',
+    description:
+      'Requiere autenticación\n' +
+      '\nEl usuario autenticado sólo puede actualizar las publicaciones que le pertenecen\n' +
+      '\nSe tiene que enviar por el cuerpo de la petición los datos que se desean modificar\n' +
+      '\nEn caso de exito retorna un mensaje y los datos de la publicación modificados',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'ID único de la publicación',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiBody({
+    type: UpdatePostDto,
+    examples: {
+      actualizaciónTítulo: {
+        value: {
+          title: 'Nuevo título',
+        },
+      },
+      actualizaciónContenido: {
+        value: {
+          content: 'Nuevo contenido...',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Se actualizó la publicación exitosamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autorización inválido o inexistente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description:
+      'El usuario o la publicación no existen o no se tienen los permisos necesarios',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'No se logró realizar la actualización, datos inexistentes o sin cambios',
+  })
   @UseGuards(AuthGuard)
   @Patch('update/:id')
   async update(
@@ -196,13 +245,40 @@ export class PostController {
     return this.postService.update(postId, req.user.sub, updatePostDto);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @Patch('approve/:id')
-  async approve(@Param('id', ParseUUIDPipe) postId: string) {
-    return this.postService.approve(postId);
-  }
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  // @Patch('approve/:id')
+  // async approve(@Param('id', ParseUUIDPipe) postId: string) {
+  //   return this.postService.approve(postId);
+  // }
 
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Banea una publicación del foro',
+    description:
+      'Requiere autenticación\n' +
+      'Unicamente puede ser usado por un usuario administrador\n' +
+      '\nSe tiene que enviar por el parámetro de la ruta el id de la publicación a banear\n' +
+      '\nEn caso de exito retorna un mensaje de exito indicando que la operación se realizó correctamente',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'ID único de la publicación',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'La publicación se baneo correctamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autorización inválido o inexistente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'La publicación no existe',
+  })
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Patch('ban/:id')
