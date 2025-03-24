@@ -36,7 +36,7 @@ export class FoodTrackerController {
     summary: 'Crea un registro de comida del usuario autenticado',
     description:
       'Requiere autenticación\n' +
-      '\nSe debe enviar por body el nombre de la comida, cantidad de calorias ingeridas, descripción y opcionalmente la fecha de creación y una imagen de la comida\n' +
+      '\nSe debe enviar en el cuerpo de la petición el nombre de la comida, cantidad de calorias ingeridas, descripción y opcionalmente la fecha de creación\n' +
       '\nEn caso de exito retorna un mensaje y los datos de registro de comida creado',
   })
   @ApiBody({
@@ -55,8 +55,6 @@ export class FoodTrackerController {
           calories: 10,
           description: 'Carne asada al carbón acompañada de nopales',
           createdAt: '2025-11-01',
-          image:
-            'https://mi-bucket.s3.us-east-1.amazonaws.com/imagenes/ejemplo.jpg',
         },
       },
     },
@@ -91,7 +89,7 @@ export class FoodTrackerController {
     summary: 'Devuelve la cantidad de calorías consumidas por día',
     description:
       'Requiere autenticación\n' +
-      '\nSe puede enviar por query param la fecha de la cual se desean obtener los registros y la zona horaria del usuario, si no se envían se toma por defecto la fecha actual\n' +
+      '\nSe puede enviar por parametros de consulta la fecha de la cual se desean obtener los registros y la zona horaria del usuario, si no se envían se toma por defecto la fecha actual\n' +
       '\nEn caso de exito retorna un mensaje y la cantidad de calorías consumidas en el día',
   })
   @ApiQuery({
@@ -109,7 +107,7 @@ export class FoodTrackerController {
   @ApiResponse({
     status: HttpStatus.OK,
     description:
-      'Se obtuvieron con exito los registros de comida para la fecha solicitada',
+      'Se obtuvo con exito la cantidad de calorías consumida para la fecha solicitada',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -137,7 +135,7 @@ export class FoodTrackerController {
     summary: 'Devuelve todos los registros de consumo de comida por día',
     description:
       'Requiere autenticación\n' +
-      '\nSe puede enviar por query param la fecha de la cual se desean obtener los registros y la zona horaria del usuario, si no se envían se toma por defecto la fecha actual\n' +
+      '\nSe puede enviar por parámetros de consulta la fecha de la cual se desean obtener los registros y la zona horaria del usuario, si no se envían se toma por defecto la fecha actual\n' +
       '\nLos resultados se envían paginados, si no se envían se toma por defecto la página 1 con un máximo de 10 elementos por página\n' +
       '\nEn caso de exito retorna un mensaje y los datos de los registros de comida para la fecha indicada',
   })
@@ -197,6 +195,7 @@ export class FoodTrackerController {
     description:
       'Requiere autenticación\n' +
       '\nEl usuario autenticado sólo puede borrar los registros que le pertenecen\n' +
+      '\nSe debe enviar por parámetro de ruta el id del registro de comida que se desea eliminar\n' +
       '\nEn caso de exito retorna un mensaje indicando que registro se eliminó',
   })
   @ApiParam({
@@ -236,6 +235,8 @@ export class FoodTrackerController {
       'Requiere autenticación\n' +
       '\nEl usuario autenticado sólo puede actualizar los registros que le pertenecen\n' +
       '\nLa actualización también incluye modifcar el estado del registro de comida, es decir, hacer un soft-delete\n' +
+      '\nSe tiene que enviar por parámetro de ruta el id del registro de comida que se desea actualizar\n' +
+      '\nSe tiene que enviar por el cuerpo de la petición los datos que se desean modificar\n' +
       '\nEn caso de exito retorna un mensaje y los datos del registro modificado',
   })
   @ApiParam({
@@ -244,9 +245,24 @@ export class FoodTrackerController {
     description: 'ID único del registro de comida',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
+  @ApiBody({
+    type: UpdateFoodTrackerDto,
+    examples: {
+      actualizaciónNombre: {
+        value: {
+          name: 'Nuevo nombre',
+        },
+      },
+      softDelete: {
+        value: {
+          isActive: false,
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Se eliminó el registro de comida de forma exitosa',
+    description: 'Se actualizó el registro de comida de forma exitosa',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -270,6 +286,25 @@ export class FoodTrackerController {
     );
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Agrega una imagen al registro de comida',
+    description:
+      'Requiere autenticación\n' +
+      '\nEl usuario autenticado sólo puede agregar una imagen a un registro de su autoría\n' +
+      '\nEn caso de exito retorna un mensaje indicando que se logró asociar la imagen con el registro deseado',
+  })
+  @ApiParam({
+    name: 'foodTrackerId',
+    type: String,
+    description: 'ID único del registro de comida',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description:
+      'Se actualizó la imagen correspondiente al registro de comida de forma exitosa',
+  })
   @Put(':foodTrackerId/image')
   @UseGuards(AuthGuard)
   async updateImage(

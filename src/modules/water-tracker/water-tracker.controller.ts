@@ -29,8 +29,9 @@ export class WaterTrackerController {
   @ApiOperation({
     summary: 'Actualiza el registro de consumo de agua',
     description:
-      'Incrementa o disminuye la cantidad de agua registrada del usuario en 50 mililitros.\n' +
       '\nRequiere autenticación\n' +
+      '\nSi no existe un registro lo crea, de lo contrario lo actualiza\n' +
+      '\nIncrementa o disminuye la cantidad de agua registrada del usuario en 50 mililitros.\n' +
       '\nSe debe enviar por body la acción a realizar, incrementar o disminuir\n' +
       '\nEn caso de exito retorna un mensaje y la cantidad de consumo de agua actualizada',
   })
