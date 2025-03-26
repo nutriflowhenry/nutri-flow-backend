@@ -55,19 +55,23 @@ export class EmailService {
       const template = fs.readFileSync(templatePath, 'utf8');
       const html = ejs.render(template, {
         name,
-        created_at: subscription.created_at.toISOString(),
+        created_at: DateTime.fromISO(subscription.created_at.toISOString())
+          .setZone(timeZone)
+          .toFormat('dd/MM/yyyy, hh:mm a'),
         // currentPeriodStart: subscription.currentPeriodStart.toISOString(),
         currentPeriodStart: DateTime.fromISO(
           subscription.currentPeriodStart.toISOString(),
         )
           .setZone(timeZone)
-          .toLocaleString(DateTime.DATETIME_SHORT),
+          .toFormat('dd/MM/yyyy, hh:mm a'),
+        // .toLocaleString(DateTime.DATETIME_SHORT),
         // currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
         currentPeriodEnd: DateTime.fromISO(
           subscription.currentPeriodEnd.toISOString(),
         )
           .setZone(timeZone)
-          .toLocaleString(DateTime.DATETIME_SHORT),
+          // .toLocaleString(DateTime.DATETIME_SHORT),
+          .toFormat('dd/MM/yyyy, hh:mm a'),
       });
       await this.transporter.sendMail({
         from: '"Nutriflow" <nutriflow@gmail.com>',
