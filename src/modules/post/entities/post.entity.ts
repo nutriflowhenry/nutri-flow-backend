@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { PostStatus } from '../enums/post-status.enum';
 import { User } from 'src/modules/users/entities/user.entity';
@@ -16,12 +17,20 @@ import { Comment } from '../submodules/comment/entities/comment.entity';
 import { PostReaction } from '../submodules/reaction/entities/post-reaction.entity';
 
 @Entity({ name: 'posts' })
+@Index(['titleVector'])
 export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ length: 120 })
   title: string;
+
+  @Column({
+    type: 'tsvector',
+    generatedType: 'STORED',
+    asExpression: `to_tsvector('spanish', title)`,
+  })
+  titleVector: string;
 
   @Column({ length: 5000 })
   content: string;
