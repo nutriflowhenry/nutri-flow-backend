@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -96,7 +97,7 @@ export class CommentService {
     }
 
     const foundVerifiedComment: Comment =
-      await this.commentRepository.findVerified(postId, commentId, userId);
+      await this.commentRepository.findVerified(commentId, userId);
 
     if (!foundVerifiedComment) {
       throw new NotFoundException(
@@ -125,9 +126,35 @@ export class CommentService {
     };
   }
 
-  async remove(postId: string, commentId: string, userId: string) {
+  async inactivate(commentId: string, userId: string) {
+    const [foundComment, foundUser] = await Promise.all([
+      this.commentRepository.findVerified(commentId, userId),
+      this.userservice.findById(userId),
+    ]);
+
+    if (!foundComment) {
+      throw new NotFoundException(
+        'El comentario indicado no existe o no se tienen los permisos para borrarlo',
+      );
+    }
+    if (!foundUser) {
+      throw new NotFoundException('El usuario indicado no existe');
+    }
+
+    const updateResult = await this.commentRepository.inactive(foundComment.id);
+    if (updateResult.affected === 0) {
+      throw new InternalServerErrorException(
+        'No se pudo realizar la inactivación del comentario',
+      );
+    }
+    return {
+      message: `El comentario con id ${foundComment.id} se inactivo con exito`,
+    };
+  }
+
+  async remove(commentId: string, userId: string) {
     const foundVerifiedComment: Comment =
-      await this.commentRepository.findVerified(postId, commentId, userId);
+      await this.commentRepository.findVerified(commentId, userId);
 
     if (!foundVerifiedComment) {
       throw new NotFoundException(

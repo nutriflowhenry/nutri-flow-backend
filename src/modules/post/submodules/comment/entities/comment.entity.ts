@@ -17,6 +17,9 @@ export class Comment {
   @Column({ length: 500 })
   content: string;
 
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
+
   @ManyToOne(() => User, (user) => user.comments, {
     nullable: false,
     onDelete: 'CASCADE',
