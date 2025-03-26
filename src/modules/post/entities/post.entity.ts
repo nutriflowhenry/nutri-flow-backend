@@ -27,8 +27,8 @@ export class Post {
   content: string;
 
   @Column({
-    type: 'enum',
-    enum: Tag,
+    type: 'text',
+    // enum: Tag,
     array: true,
     default: [],
   })

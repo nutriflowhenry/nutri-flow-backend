@@ -67,7 +67,9 @@ export class PostRepository {
       postQueryBuilder.where('post.status = :status', { status });
     }
     if (tags?.length > 0) {
-      postQueryBuilder.andWhere('post.tags IN (:...tags)', { tags });
+      postQueryBuilder.andWhere('post.tags && CAST(:tags AS text[])', {
+        tags,
+      });
     }
     if (searchOnTitle) {
       postQueryBuilder.andWhere('post.title LIKE :search', {
@@ -96,7 +98,9 @@ export class PostRepository {
       postQueryBuilderCount.where('post.status = :status', { status });
     }
     if (tags?.length > 0) {
-      postQueryBuilderCount.andWhere('post.tags IN (:...tags)', { tags });
+      postQueryBuilderCount.andWhere('post.tags && CAST(:tags AS text[])', {
+        tags,
+      });
     }
     if (searchOnTitle) {
       postQueryBuilderCount.andWhere('post.title LIKE :search', {
