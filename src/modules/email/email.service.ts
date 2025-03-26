@@ -60,13 +60,13 @@ export class EmailService {
         currentPeriodStart: DateTime.fromISO(
           subscription.currentPeriodStart.toISOString(),
         )
-          .setLocale(timeZone)
+          .setZone(timeZone)
           .toLocaleString(DateTime.DATETIME_SHORT),
         // currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
         currentPeriodEnd: DateTime.fromISO(
           subscription.currentPeriodEnd.toISOString(),
         )
-          .setLocale(timeZone)
+          .setZone(timeZone)
           .toLocaleString(DateTime.DATETIME_SHORT),
       });
       await this.transporter.sendMail({
