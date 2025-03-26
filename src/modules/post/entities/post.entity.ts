@@ -9,7 +9,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { PostStatus } from '../enums/post-status.enum';
-import { PostImage } from './post-image.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import { PostFavorite } from '../submodules/favorite/entities/post-favorite.entity';
 import { Tag } from '../enums/tag.enum';
@@ -44,12 +43,6 @@ export class Post {
 
   @Column({ nullable: true })
   image: string;
-
-  // @OneToMany(() => PostImage, (postImage) => postImage.post, {
-  //   cascade: true,
-  //   nullable: true,
-  // })
-  // images?: PostImage[];
 
   @OneToMany(() => Comment, (postComment) => postComment.post, {
     nullable: true,
