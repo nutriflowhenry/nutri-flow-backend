@@ -3,10 +3,12 @@ import { UpdateEmailDto } from './dto/update-email.dto';
 import { Transporter } from 'nodemailer';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EventPayloads } from '../emitters/event-types.interface';
+import { DateTime } from 'luxon';
 
 import * as ejs from 'ejs';
 import * as path from 'path';
 import * as fs from 'fs';
+import { DeleteTopicCommand } from '@aws-sdk/client-sns';
 
 @Injectable()
 export class EmailService {
@@ -44,7 +46,7 @@ export class EmailService {
   async sendSubscriptionCongratsEmail(
     data: EventPayloads['premium.subscription.created'],
   ) {
-    const { name, email, subscription } = data;
+    const { name, email, subscription, timeZone } = data;
     try {
       const templatePath = path.join(
         __dirname,
@@ -53,9 +55,23 @@ export class EmailService {
       const template = fs.readFileSync(templatePath, 'utf8');
       const html = ejs.render(template, {
         name,
-        created_at: subscription.created_at.toISOString(),
-        currentPeriodStart: subscription.currentPeriodStart.toISOString(),
-        currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
+        created_at: DateTime.fromISO(subscription.created_at.toISOString())
+          .setZone(timeZone)
+          .toFormat('dd/MM/yyyy, hh:mm a'),
+        // currentPeriodStart: subscription.currentPeriodStart.toISOString(),
+        currentPeriodStart: DateTime.fromISO(
+          subscription.currentPeriodStart.toISOString(),
+        )
+          .setZone(timeZone)
+          .toFormat('dd/MM/yyyy, hh:mm a'),
+        // .toLocaleString(DateTime.DATETIME_SHORT),
+        // currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
+        currentPeriodEnd: DateTime.fromISO(
+          subscription.currentPeriodEnd.toISOString(),
+        )
+          .setZone(timeZone)
+          // .toLocaleString(DateTime.DATETIME_SHORT),
+          .toFormat('dd/MM/yyyy, hh:mm a'),
       });
       await this.transporter.sendMail({
         from: '"Nutriflow" <nutriflow@gmail.com>',

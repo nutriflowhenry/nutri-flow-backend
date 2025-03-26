@@ -162,6 +162,7 @@ export class PaymentsService {
         email: user.email,
         name: user.name,
         subscription: payment,
+        timeZone: user.timeZone,
       });
     } else {
       const activeSuscription: Payment =
