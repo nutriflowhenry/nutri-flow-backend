@@ -28,6 +28,7 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
+import { userInfo } from 'node:os';
 
 @Controller('post/:postId/comment')
 export class CommentController {
@@ -190,19 +191,54 @@ export class CommentController {
 
   @ApiBearerAuth()
   @ApiOperation({
+    summary: 'Desactiva un comentario del usuario logueado',
+    description:
+      'Requiere autenticación\n' +
+      '\nEl usuario autenticado sólo puede desactivar los comentarios que le pertenecen\n' +
+      '\nSe tiene que enviar por parametro el id del comentario que se desea desactivar\n' +
+      '\nEn caso de exito retorna un mensaje indicando que la operación se realizó con exito',
+  })
+  @ApiParam({
+    name: 'commentId',
+    type: String,
+    description: 'ID único del comentario',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Se desactivó el comentario exitosamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autorización inválido o inexistente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description:
+      'El usuario o el comentario no existen o no se tienen los permisos necesarios',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'No se logró realizar la actualización, datos inexistentes o sin cambios',
+  })
+  @UseGuards(AuthGuard)
+  @Patch('inactivate/my/:commentId')
+  async inactivate(
+    @Param('commentId', ParseUUIDPipe) commentId: string,
+    @Req() req: { user: { sub: string } },
+  ) {
+    return this.commentService.inactivate(commentId, req.user.sub);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({
     summary: 'Permite a un usuario eliminar alguno de sus comentarios',
     description:
       'Requiere autenticación\n' +
       '\nEl usuario sólo puede borrar sus propios comentarios\n' +
-      '\nSe tiene que enviar por parametro el id del Post al cual pertenece el comentario\n' +
       '\nSe tiene que enviar por parametro el id del comentario que se desea eliminar\n' +
       '\nEn caso de exito retorna un mensaje indicando el exito al eliminar el comentario',
-  })
-  @ApiParam({
-    name: 'postId',
-    type: String,
-    description: 'ID único de la publicación',
-    example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @ApiParam({
     name: 'commentId',
@@ -225,11 +261,10 @@ export class CommentController {
   @UseGuards(AuthGuard)
   @Delete('my/:commentId')
   async remove(
-    @Param('postId', ParseUUIDPipe) postId: string,
     @Param('commentId', ParseUUIDPipe) commentId: string,
     @Req() req: { user: { sub: string } },
   ) {
-    return this.commentService.remove(postId, commentId, req.user.sub);
+    return this.commentService.remove(commentId, req.user.sub);
   }
 
   @ApiBearerAuth()

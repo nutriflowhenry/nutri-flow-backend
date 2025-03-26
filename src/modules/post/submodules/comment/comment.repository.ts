@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from './entities/comment.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-commnet.dto';
 import { User } from 'src/modules/users/entities/user.entity';
@@ -28,12 +28,15 @@ export class CommentRepository {
   }
 
   async findVerified(
-    postId: string,
     commentId: string,
     userId: string,
   ): Promise<Comment | null> {
     return this.postCommentRepository.findOne({
-      where: { id: commentId, author: { id: userId }, post: { id: postId } },
+      where: {
+        id: commentId,
+        isActive: true,
+        author: { id: userId },
+      },
     });
   }
 
@@ -60,6 +63,7 @@ export class CommentRepository {
       .leftJoinAndSelect('comment.post', 'post')
       .select('comment')
       .where('post.id = :id', { id: postId })
+      .andWhere('comment.isActive = :isActive', { isActive: true })
       .andWhere('post.status = :status', { status: PostStatus.APPROVED })
       .orderBy('comment.createdAt', 'DESC')
       .addOrderBy('comment.id', 'ASC')
@@ -76,8 +80,15 @@ export class CommentRepository {
     return this.postCommentRepository.save(foundComment);
   }
 
+  async inactive(id: string): Promise<UpdateResult> {
+    const updateResult: UpdateResult = await this.postCommentRepository.update(
+      id,
+      { isActive: false },
+    );
+    return updateResult;
+  }
+
   async delete(commentId: string) {
-    console.log(commentId);
     await this.postCommentRepository.delete(commentId);
   }
 }
