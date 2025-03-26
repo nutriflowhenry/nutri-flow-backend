@@ -245,12 +245,43 @@ export class PostController {
     return this.postService.update(postId, req.user.sub, updatePostDto);
   }
 
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles(Role.ADMIN)
-  // @Patch('approve/:id')
-  // async approve(@Param('id', ParseUUIDPipe) postId: string) {
-  //   return this.postService.approve(postId);
-  // }
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Activa una publicación del foro previamente baneada',
+    description:
+      'Requiere autenticación\n' +
+      'Unicamente puede ser usado por un usuario administrador\n' +
+      '\nSe tiene que enviar por el parámetro de la ruta el id de la publicación que se desea activar\n' +
+      '\nEn caso de exito retorna un mensaje de exito indicando que la operación se realizó correctamente',
+  })
+  @ApiParam({
+    name: 'postId',
+    type: String,
+    description: 'ID único de la publicación',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'La publicación se activo correctamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autorización inválido o inexistente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'La publicación no existe',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'La publicación ya está activa',
+  })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('activate/:postId')
+  async activate(@Param('postId', ParseUUIDPipe) postId: string) {
+    return this.postService.activate(postId);
+  }
 
   @ApiBearerAuth()
   @ApiOperation({
@@ -284,6 +315,42 @@ export class PostController {
   @Patch('ban/:id')
   async ban(@Param('id', ParseUUIDPipe) postId: string) {
     return this.postService.ban(postId);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Desactiva una publicación del foro',
+    description:
+      'Requiere autenticación\n' +
+      'Permite desactivar un post perteneciente al usuario logueado \n' +
+      '\nSe tiene que enviar por el parámetro de la ruta el id de la publicación a desactivar\n' +
+      '\nEn caso de exito retorna un mensaje de exito indicando que la operación se realizó correctamente',
+  })
+  @ApiParam({
+    name: 'postId',
+    type: String,
+    description: 'ID único de la publicación',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'La publicación se desactivo correctamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autorización inválido o inexistente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'La publicación no existe o ya está desactivada',
+  })
+  @UseGuards(AuthGuard)
+  @Patch('deactivate/:postId')
+  async deactivate(
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Req() req: { user: { sub: string } },
+  ) {
+    return this.postService.deactivate(postId, req.user.sub);
   }
 
   @Put(':postId/image')
