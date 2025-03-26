@@ -1,5 +1,6 @@
 import {
   Controller,
+  HttpStatus,
   Post,
   RawBodyRequest,
   Req,
@@ -8,11 +9,25 @@ import {
 import Stripe from 'stripe';
 import { PaymentsService } from '../payments/payments.service';
 import { StripeWebhookGuard } from './guards/stripe.guard';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('stripe')
 export class StripeController {
   constructor(private readonly paymentService: PaymentsService) {}
 
+  @ApiOperation({
+    summary: 'Recibe las notificaciones que envía Stripe',
+    description:
+      'Recibe y procesa las notificaciones que envía Stripe a través de wehooks hacerca de los eventos asociados a los pagos de suscripciones realizados por los usuarios para acceder a las características premium',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Se recibió correctamente el evento enviado',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Hubo un error al recibir el evento',
+  })
   @UseGuards(StripeWebhookGuard)
   @Post('webhook')
   async handleWebhook(@Req() req: RawBodyRequest<Request>) {

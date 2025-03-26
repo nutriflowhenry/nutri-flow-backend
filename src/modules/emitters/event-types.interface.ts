@@ -6,5 +6,6 @@ export interface EventPayloads {
     name: string;
     email: string;
     subscription: Payment;
+    timeZone: string;
   };
 }
