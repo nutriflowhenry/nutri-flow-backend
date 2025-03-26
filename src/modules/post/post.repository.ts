@@ -72,15 +72,19 @@ export class PostRepository {
       });
     }
     if (searchOnTitle) {
-      postQueryBuilder.andWhere('post.title LIKE :search', {
-        search: `%${searchOnTitle}%`,
-      });
+      postQueryBuilder
+        .addSelect(
+          `ts_rank(post.titleVector, plainto_tsquery('spanish', :search))`,
+          'relevance',
+        )
+        .where(`post.titleVector @@ plainto_tsquery('spanish', :search)`, {
+          search: searchOnTitle,
+        })
+        .orderBy('relevance', 'DESC');
+    } else {
+      postQueryBuilder.orderBy('post.createdAt', 'DESC');
     }
-    postQueryBuilder
-      .orderBy('post.createdAt', 'DESC')
-      .addOrderBy('post.id', 'ASC')
-      .skip(skip)
-      .take(limit);
+    postQueryBuilder.addOrderBy('post.id', 'ASC').skip(skip).take(limit);
 
     const postRaw = await postQueryBuilder.getRawAndEntities();
 
@@ -103,9 +107,14 @@ export class PostRepository {
       });
     }
     if (searchOnTitle) {
-      postQueryBuilderCount.andWhere('post.title LIKE :search', {
-        search: `%${searchOnTitle}%`,
-      });
+      postQueryBuilderCount
+        .addSelect(
+          `ts_rank(post.titleVector, plainto_tsquery('spanish', :search))`,
+          'relevance',
+        )
+        .where(`post.titleVector @@ plainto_tsquery('spanish', :search)`, {
+          search: searchOnTitle,
+        });
     }
 
     const total: number = await postQueryBuilderCount.getCount();
