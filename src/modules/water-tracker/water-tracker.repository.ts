@@ -7,9 +7,14 @@ import { UpdateWaterTrackerDto } from './dto/update-water-tracker.dto';
 import { WaterTrackerAction } from './enums/WaterTrackerAction.enum';
 import { UserProfile } from '../user-profiles/entities/user-profile.entity';
 import { DateTime } from 'luxon';
+import { GetAllWaterTrackerDto } from './dto/get-all-water-tracker.dto';
 
 @Injectable()
 export class WaterTrackerRepository {
+  //     queryDate.getUTCMonth(),
+  //     queryDate.getUTCDate() + 1,
+  //   ),
+  // );
   constructor(
     @InjectRepository(WaterTracker)
     private readonly waterTrackerRepository: Repository<WaterTracker>,
@@ -83,5 +88,43 @@ export class WaterTrackerRepository {
       },
     });
     return waterTracker;
+  }
+
+  async getAll(
+    userProfile: UserProfile,
+    limit: number,
+    skip: number,
+  ): Promise<[WaterTracker[], number]> {
+    return this.waterTrackerRepository.findAndCount({
+      where: {
+        userProfile: userProfile,
+      },
+      order: {
+        date: 'DESC',
+        id: 'ASC',
+      },
+      skip,
+      take: limit,
+    });
+  }
+
+  private getStartAndEndOfDay(
+    date?: string,
+    timeZone: string = 'America/Mexico_City',
+  ) {
+    const userDate = date
+      ? DateTime.fromJSDate(new Date(date)).setZone(timeZone)
+      : DateTime.now().setZone(timeZone);
+
+    const startOfDay = userDate.startOf('day');
+    const endOfDay = userDate.endOf('day');
+
+    const startUTC = startOfDay.toUTC().toJSDate();
+    const endUTC = endOfDay.toUTC().toJSDate();
+
+    return {
+      startUTC,
+      endUTC,
+    };
   }
 }

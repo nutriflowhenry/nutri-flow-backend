@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { WaterTrackerService } from './water-tracker.service';
 import { UpdateWaterTrackerDto } from './dto/update-water-tracker.dto';
-import { GetWaterTrackerDto } from './dto/get-water-tracker.dto';
+import { GetAllWaterTrackerDto } from './dto/get-all-water-tracker.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import {
   ApiBearerAuth,
@@ -20,6 +20,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { WaterTrackerAction } from './enums/WaterTrackerAction.enum';
+import { GetDailyWaterTrackerDto } from './dto/get-daily-water-tracker.dto';
 
 @Controller('water-tracker')
 export class WaterTrackerController {
@@ -117,10 +118,19 @@ export class WaterTrackerController {
   @UseGuards(AuthGuard)
   @Get('daily')
   async getDailyWaterTracker(
-    @Query() queryData: GetWaterTrackerDto,
+    @Query() queryData: GetDailyWaterTrackerDto,
     @Req() req: { user: { sub: string } },
   ) {
     const day: string = queryData.date;
     return this.waterTrackerService.getDailyWaterTracker(req.user.sub, day);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('all')
+  async getAll(
+    @Query() paginationData: GetAllWaterTrackerDto,
+    @Req() req: { user: { sub: string } },
+  ) {
+    return this.waterTrackerService.getAll(req.user.sub, paginationData);
   }
 }
