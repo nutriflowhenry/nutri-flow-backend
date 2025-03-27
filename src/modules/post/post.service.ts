@@ -151,9 +151,9 @@ export class PostService {
                 author: {
                     id: post.author.id,
                     name: post.author.name,
-                    profilePicture: await this.cloudFrontService.generateSignedUrl(post.author.profilePicture),
                 }
-            })));
+            }))
+        );
 
         return {
             message: `Se obtuvieron correctamente los Post activos (aprobados), página actual: ${getPostData.page}, número máximo de Post por página ${getPostData.limit}`,

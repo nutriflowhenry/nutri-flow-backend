@@ -7,9 +7,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { PostStatus } from '../enums/post-status.enum';
-import { PostImage } from './post-image.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import { PostFavorite } from '../submodules/favorite/entities/post-favorite.entity';
 import { Tag } from '../enums/tag.enum';
@@ -17,12 +17,20 @@ import { Comment } from '../submodules/comment/entities/comment.entity';
 import { PostReaction } from '../submodules/reaction/entities/post-reaction.entity';
 
 @Entity({ name: 'posts' })
+@Index(['titleVector'])
 export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ length: 120 })
   title: string;
+
+  @Column({
+    type: 'tsvector',
+    generatedType: 'STORED',
+    asExpression: `to_tsvector('spanish', title)`,
+  })
+  titleVector: string;
 
   @Column({ length: 5000 })
   content: string;
@@ -44,12 +52,6 @@ export class Post {
 
   @Column({ nullable: true })
   image: string;
-
-  // @OneToMany(() => PostImage, (postImage) => postImage.post, {
-  //   cascade: true,
-  //   nullable: true,
-  // })
-  // images?: PostImage[];
 
   @OneToMany(() => Comment, (postComment) => postComment.post, {
     nullable: true,
