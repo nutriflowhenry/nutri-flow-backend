@@ -8,6 +8,8 @@ import { UserProfilesService } from '../user-profiles/user-profiles.service';
 import { User } from '../users/entities/user.entity';
 import { UserProfile } from '../user-profiles/entities/user-profile.entity';
 import { GetAllWaterTrackerDto } from './dto/get-all-water-tracker.dto';
+import { DateTime } from 'luxon';
+import { getgid } from 'process';
 
 @Injectable()
 export class WaterTrackerService {
@@ -67,13 +69,24 @@ export class WaterTrackerService {
   }
 
   async getAll(userId: string, getData: GetAllWaterTrackerDto) {
-    const user: User = await this.userService.findById(userId);
-    const userTimeZone: string = user.timeZone;
-    // if (!userTimeZone) {
-    //   getData.timeZone =
-    // }
+    const skip: number = (getData.page - 1) * getData.limit;
     const validateUserProfile: UserProfile = await this.getUserProfile(userId);
-    await this.waterTrackerRepository.getAll(validateUserProfile.id, getData);
+    const [waterTrackers, waterTrackerCount] =
+      await this.waterTrackerRepository.getAll(
+        validateUserProfile,
+        getData.limit,
+        skip,
+      );
+    return {
+      message: `Registros de consumo de agua obtenidos con exito para el usuario id ${userId}`,
+      data: {
+        results: waterTrackers,
+        total: waterTrackerCount,
+        page: getData.page,
+        limit: getData.limit,
+        totalPages: Math.ceil(waterTrackerCount / getData.limit),
+      },
+    };
   }
 
   async getUserProfile(userId: string): Promise<UserProfile> {
@@ -92,5 +105,25 @@ export class WaterTrackerService {
     } else {
       return userProfile;
     }
+  }
+
+  getStartAndEndOfDay(
+    date?: string,
+    timeZone: string | null = 'America/Argentina/Buenos_Aires',
+  ) {
+    const userDate = date
+      ? DateTime.fromJSDate(new Date(date)).setZone(timeZone)
+      : DateTime.now().setZone(timeZone);
+
+    const startOfDay = userDate.startOf('day');
+    const endOfDay = userDate.endOf('day');
+
+    const startUTC = startOfDay.toUTC().toJSDate();
+    const endUTC = endOfDay.toUTC().toJSDate();
+
+    return {
+      startUTC,
+      endUTC,
+    };
   }
 }
