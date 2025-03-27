@@ -7,6 +7,7 @@ import { UsersService } from '../users/users.service';
 import { UserProfilesService } from '../user-profiles/user-profiles.service';
 import { User } from '../users/entities/user.entity';
 import { UserProfile } from '../user-profiles/entities/user-profile.entity';
+import { GetAllWaterTrackerDto } from './dto/get-all-water-tracker.dto';
 
 @Injectable()
 export class WaterTrackerService {
@@ -63,6 +64,16 @@ export class WaterTrackerService {
     return {
       waterTracker,
     };
+  }
+
+  async getAll(userId: string, getData: GetAllWaterTrackerDto) {
+    const user: User = await this.userService.findById(userId);
+    const userTimeZone: string = user.timeZone;
+    // if (!userTimeZone) {
+    //   getData.timeZone =
+    // }
+    const validateUserProfile: UserProfile = await this.getUserProfile(userId);
+    await this.waterTrackerRepository.getAll(validateUserProfile.id, getData);
   }
 
   async getUserProfile(userId: string): Promise<UserProfile> {
