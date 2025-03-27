@@ -29,12 +29,13 @@ export class UsersService {
     async findAll(): Promise<PublicUserDto[]> {
         let users = await this.usersRepository.findAll();
 
-        users.map(async user => ({
-            ...user,
-            profilePicture: await this.cloudFrontService.generateSignedUrl(user.profilePicture),
-        }));
+        const mappedUsers = await Promise.all(
+            users.map(async user => ({
+                ...user,
+                profilePicture: await this.cloudFrontService.generateSignedUrl(user.profilePicture),
+            })));
 
-        return plainToInstance(PublicUserDto, users);
+        return plainToInstance(PublicUserDto, mappedUsers);
     }
 
 
