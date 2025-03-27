@@ -96,7 +96,32 @@ export class PostService {
         };
     }
 
-    async approve(id: string) {
+    async deactivate(postId: string, userId: string) {
+        const [foundPost, foundUser] = await Promise.all([
+            this.postRepository.findByAuthorAndId(postId, userId),
+            this.userService.findById(userId),
+        ]);
+
+        if (!foundPost) {
+            throw new NotFoundException('El post no existe o ya está inactivo');
+        }
+        if (!foundUser) {
+            throw new NotFoundException('El usuario indicado no existe');
+        }
+
+        const deactivateResult: UpdateResult =
+            await this.postRepository.ban(postId);
+        if (deactivateResult.affected === 0) {
+            throw new InternalServerErrorException(
+                'No se pudo inacivar el post indicado',
+            );
+        }
+        return {
+            message: `El post con id ${postId} se inactivo correctamente`,
+        };
+    }
+
+    async activate(id: string) {
         const foundPost: Post = await this.postRepository.findOneById(id);
         if (!foundPost) {
             throw new ForbiddenException('El post indicado no existe');
@@ -151,6 +176,7 @@ export class PostService {
                 author: {
                     id: post.author.id,
                     name: post.author.name,
+                    profilePicture: await this.cloudFrontService.generateSignedUrl(post.author.profilePicture),
                 }
             }))
         );
