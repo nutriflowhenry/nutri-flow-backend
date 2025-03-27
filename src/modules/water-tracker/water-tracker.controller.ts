@@ -128,9 +128,9 @@ export class WaterTrackerController {
   @UseGuards(AuthGuard)
   @Get('all')
   async getAll(
-    @Query() getData: GetAllWaterTrackerDto,
+    @Query() paginationData: GetAllWaterTrackerDto,
     @Req() req: { user: { sub: string } },
   ) {
-    return this.waterTrackerService.getAll(req.user.sub, getData);
+    return this.waterTrackerService.getAll(req.user.sub, paginationData);
   }
 }

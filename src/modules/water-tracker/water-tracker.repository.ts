@@ -90,12 +90,22 @@ export class WaterTrackerRepository {
     return waterTracker;
   }
 
-  async getAll(id: string, getData: GetAllWaterTrackerDto) {
-    const dateDataUtc = this.getStartAndEndOfDay(
-      getData.date,
-      getData.timeZone,
-    );
-    return;
+  async getAll(
+    userProfile: UserProfile,
+    limit: number,
+    skip: number,
+  ): Promise<[WaterTracker[], number]> {
+    return this.waterTrackerRepository.findAndCount({
+      where: {
+        userProfile: userProfile,
+      },
+      order: {
+        date: 'DESC',
+        id: 'ASC',
+      },
+      skip,
+      take: limit,
+    });
   }
 
   private getStartAndEndOfDay(
