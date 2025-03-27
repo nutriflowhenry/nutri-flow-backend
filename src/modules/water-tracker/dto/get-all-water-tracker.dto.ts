@@ -1,12 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsISO8601,
-  IsOptional,
-  IsTimeZone,
-} from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsInt, IsISO8601, IsOptional, IsTimeZone, Min } from 'class-validator';
 
-export class GetWaterTrackerDto {
+export class GetAllWaterTrackerDto {
   @ApiProperty({
     description:
       'Fecha de la cual se desea obtener los registros de consumo de agua, debe estar en formato ISO8601',
@@ -33,4 +29,28 @@ export class GetWaterTrackerDto {
   @IsOptional()
   @IsTimeZone()
   timeZone?: string;
+
+  @ApiProperty({
+    description: 'Número de página que se desea obtener',
+    example: 2,
+    required: false,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page = 1;
+
+  @ApiProperty({
+    description: 'Número máximo de elementos por página',
+    example: 15,
+    required: false,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit = 10;
 }
