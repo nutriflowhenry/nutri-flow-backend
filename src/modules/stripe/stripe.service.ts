@@ -30,8 +30,8 @@ export class StripeService {
         mode: 'subscription',
         line_items: [{ price: baseSubscriptionPriceId, quantity: 1 }],
         success_url:
-          'http://localhost:3000/dashboard?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url: 'http://localhost:3000/dashboard',
+          'https://nutri-flow-henry.vercel.app/dashboard?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'https://nutri-flow-henry.vercel.app/dashboard',
         expires_at: expiresAt,
       });
     } catch (error) {
