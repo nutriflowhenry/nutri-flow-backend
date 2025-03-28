@@ -19,7 +19,7 @@ export class FoodTracker {
   @Column({ type: 'float' })
   calories: number;
 
-  @Column({ type: 'varchar', length: 50, default: '' })
+  @Column({ type: 'varchar', length: 500, default: '' })
   description: string;
 
   @Column({
