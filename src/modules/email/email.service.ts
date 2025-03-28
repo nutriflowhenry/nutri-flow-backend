@@ -85,4 +85,30 @@ export class EmailService {
       throw error;
     }
   }
+
+  @OnEvent('user.reminders', { async: true })
+  async sendReminderEmail(data: EventPayloads['user.reminders']) {
+    const { name, email } = data;
+    try {
+      const templatePath = path.join(
+        __dirname,
+        '../../templates/welcome-email.ejs',
+      );
+      const template = fs.readFileSync(templatePath, 'utf8');
+      const html = ejs.render(template, {
+        name,
+      });
+
+      await this.transporter.sendMail({
+        from: '"Nutriflow" <nutriflow@gmail.com>',
+        to: email,
+        subject: `Bienvenido a Nutriflow ${name}`,
+        html,
+      });
+      console.log('Email enviado exitosamente');
+    } catch (error) {
+      console.error('Error enviando email:', error);
+      throw error;
+    }
+  }
 }
