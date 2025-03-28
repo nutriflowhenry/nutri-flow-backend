@@ -29,9 +29,8 @@ export class StripeService {
         payment_method_types: ['card'],
         mode: 'subscription',
         line_items: [{ price: baseSubscriptionPriceId, quantity: 1 }],
-        success_url:
-          'https://nutri-flow-henry.vercel.app/dashboard/userSetting',
-        cancel_url: 'https://nutri-flow-henry.vercel.app/dashboard/userSetting',
+        success_url: 'http://localhost:3000/payment-success',
+        cancel_url: 'http://localhost:3000/payment-success',
         expires_at: expiresAt,
       });
     } catch (error) {
