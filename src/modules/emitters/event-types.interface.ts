@@ -8,4 +8,8 @@ export interface EventPayloads {
     subscription: Payment;
     timeZone: string;
   };
+  'user.reminders': {
+    name: string;
+    email: string;
+  };
 }
