@@ -20,7 +20,7 @@ export class CreateFoodTrackerDto {
   @MinLength(3, {
     message: 'El atributo "\name\" debe tener al menos 3 caracteres',
   })
-  @MaxLength(20, {
+  @MaxLength(50, {
     message: 'El atributo "\name\" no puede tener más de 20 caracteres',
   })
   @IsString({ message: 'El atributo "\name"\ debe ser de tipo string' })
@@ -47,7 +47,7 @@ export class CreateFoodTrackerDto {
     required: true,
     type: String,
   })
-  @MaxLength(50, {
+  @MaxLength(500, {
     message:
       'El atributo "\description\" no puede tener una longitud mayor de 50 caracteres',
   })
