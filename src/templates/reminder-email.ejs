@@ -110,10 +110,26 @@
                                 <div class="progress-fill" style="width: <%= (waterConsumed/waterGoal*100).toFixed(0) %>%;"></div>
                             </div>
                             <div style="display: flex; justify-content: space-between; color: #636e72;">
-                                <span><%= waterConsumed %> ml / <%= waterGoal %> ml</span>
-                                <span><%= ((waterConsumed/waterGoal)*100).toFixed(0) %>% completado</span>
+                                <span><%= waterConsumed %> ml / <%= waterGoal %> ml </span>
+                                <span> </span>
+                                <span> <%= ((waterConsumed/waterGoal)*100).toFixed(0) %> % completado</span>
                             </div>
                         </div>
+
+                        <!-- Mensaje motivacional -->
+                        <% if(waterConsumed < waterGoal * 0.5) { %>
+                            <p style="text-align: center; color: #e17055;">
+                                ⚠️ Estás por debajo del 50% de tu meta de consumo de agua. ¡Tómate algo de agua!
+                            </p>
+                        <% } else if(waterConsumed < waterGoal) { %>
+                            <p style="text-align: center; color: #00b894;">
+                                👍 ¡Vas por buen camino! Recuerda mantener un balance en tu consumo de agua.
+                            </p>
+                        <% } else { %>
+                            <p style="text-align: center; color: #0984e3;">
+                                🎉 ¡Meta alcanzada! Buen trabajo manteniendo tu consumo de agua recomendado.
+                            </p>
+                        <% } %>
                         
                         <!-- Sección de Calorías -->
                         <div class="progress-section">
@@ -122,8 +138,9 @@
                                 <div class="progress-fill" style="width: <%= (caloriesConsumed/caloriesGoal*100).toFixed(0) %>%; background: #e17055;"></div>
                             </div>
                             <div style="display: flex; justify-content: space-between; color: #636e72;">
-                                <span><%= caloriesConsumed %> kcal / <%= caloriesGoal %> kcal</span>
-                                <span><%= ((caloriesConsumed/caloriesGoal)*100).toFixed(0) %>% completado</span>
+                                <span><%= caloriesConsumed %> kcal / <%= caloriesGoal %> kcal </span>
+                                <span> </span>
+                                <span> <%= ((caloriesConsumed/caloriesGoal)*100).toFixed(0) %> % completado</span>
                             </div>
                         </div>
                         
@@ -142,27 +159,8 @@
                             </p>
                         <% } %>
                         
-                        <!-- Tips de salud -->
-                        <div class="tip-section">
-                            <h4 style="margin: 0 0 10px; color: #e17055;">💡 Tip del Día</h4>
-                            <p style="margin: 0; color: #2d3436;">
-                                <%= healthTip %>
-                            </p>
-                        </div>
-                        
-                        <!-- Botón de acción -->
-                        <div style="text-align: center; margin-top: 30px;">
-                            <a href="<%= appUrl %>/dashboard" class="button">
-                                📊 Ver Mi Progreso Completo
-                            </a>
-                        </div>
                     </div>
                     
-                    <!-- Pie de página -->
-                    <div style="padding: 20px; text-align: center; color: #636e72; font-size: 12px;">
-                        <p style="margin: 5px 0;">¿Necesitas ajustar tus metas? <a href="<%= appUrl %>/settings" style="color: #0984e3;">Configuración</a></p>
-                        <p style="margin: 5px 0;">© 2024 HealthTracker - Tu compañero de salud</p>
-                    </div>
                 </div>
             </td>
         </tr>

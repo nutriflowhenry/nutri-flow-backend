@@ -15,5 +15,6 @@ import { UserProfilesModule } from '../user-profiles/user-profiles.module';
   ],
   controllers: [WaterTrackerController],
   providers: [WaterTrackerService, WaterTrackerRepository],
+  exports: [WaterTrackerService],
 })
 export class WaterTrackerModule {}

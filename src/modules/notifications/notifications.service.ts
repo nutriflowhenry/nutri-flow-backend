@@ -43,6 +43,9 @@ export class NotificationsService {
       await this.eventEmitter.emitAsync('user.reminders', {
         email: user.email,
         name: user.name,
+        waterGoal: user.userProfile.hydrationGoal,
+        caloriesGoal: user.userProfile.caloriesGoal,
+        userId: user.id,
       });
     }
   }
