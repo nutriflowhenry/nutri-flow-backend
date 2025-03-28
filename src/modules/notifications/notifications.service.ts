@@ -46,6 +46,7 @@ export class NotificationsService {
         waterGoal: user.userProfile.hydrationGoal,
         caloriesGoal: user.userProfile.caloriesGoal,
         userId: user.id,
+        timeZone: user.timeZone,
       });
     }
   }

@@ -14,5 +14,6 @@ export interface EventPayloads {
     email: string;
     waterGoal: number;
     caloriesGoal: number;
+    timeZone: string;
   };
 }
