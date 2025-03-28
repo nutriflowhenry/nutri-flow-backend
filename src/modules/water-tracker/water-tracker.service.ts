@@ -51,12 +51,13 @@ export class WaterTrackerService {
     };
   }
 
-  async getDailyWaterTracker(userId: string, date: string) {
+  async getDailyWaterTracker(userId: string, date?: string) {
     const userProfile: UserProfile = await this.getUserProfile(userId);
+    const dateVerified = date ? date : new Date().toISOString();
     const waterTracker: WaterTracker | null =
       await this.waterTrackerRepository.getWaterTrackerByDate(
         userProfile,
-        date,
+        dateVerified,
       );
     if (!waterTracker) {
       return {
