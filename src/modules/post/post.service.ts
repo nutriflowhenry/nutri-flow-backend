@@ -173,11 +173,13 @@ export class PostService {
         const mappedPosts = await Promise.all(
             posts.map(async post => ({
                 ...post,
-                image: await this.cloudFrontService.generateSignedUrl(post.image),
+                image: post.image ? await this.cloudFrontService.generateSignedUrl(post.image) : null,
                 author: {
                     id: post.author.id,
                     name: post.author.name,
-                    profilePicture: await this.cloudFrontService.generateSignedUrl(post.author.profilePicture),
+                    profilePicture: post.author.profilePicture
+                        ? await this.cloudFrontService.generateSignedUrl(post.author.profilePicture)
+                        : null,
                 }
             }))
         );
