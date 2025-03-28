@@ -34,7 +34,7 @@ export class ImagesController {
     }
 
 
-    @Get('post/upload-url/:foodTrackerId')
+    @Get('post/upload-url/:postId')
     @UseGuards(AuthGuard)
     async getPostImageUploadUrl(
         @Param('postId') postId: string,
