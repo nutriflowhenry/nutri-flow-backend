@@ -32,7 +32,7 @@ export class Post {
   })
   titleVector: string;
 
-  @Column({ length: 5000 })
+  @Column({ length: 6000 })
   content: string;
 
   @Column({
