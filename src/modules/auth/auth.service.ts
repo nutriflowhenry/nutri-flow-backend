@@ -106,8 +106,8 @@ export class AuthService {
 
         if (user?.isActive === false) throw new UnauthorizedException('User account is inactive!');
 
-        let profilePicturePath = null;
-        if (googleUser.picture) {
+        let profilePicturePath = user.profilePicture;
+        if (!user.profilePicture && googleUser.picture) {
             profilePicturePath = await this.usersService.uploadGoogleProfilePicture(
                 user.id,
                 googleUser.picture,
