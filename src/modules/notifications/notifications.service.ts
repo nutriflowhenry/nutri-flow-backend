@@ -29,7 +29,7 @@ export class NotificationsService {
   //     }
   // }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  // @Cron(CronExpression.EVERY_MINUTE)
   async handleAfternoonNotifications() {
     console.log('Sending afternoon notifications...');
 
