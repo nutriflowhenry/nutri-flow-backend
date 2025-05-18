@@ -29,7 +29,7 @@ export class NotificationsService {
   //     }
   // }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  // @Cron(CronExpression.EVERY_MINUTE)
   async handleAfternoonNotifications() {
     console.log('Sending afternoon notifications...');
 
@@ -46,6 +46,7 @@ export class NotificationsService {
         waterGoal: user.userProfile.hydrationGoal,
         caloriesGoal: user.userProfile.caloriesGoal,
         userId: user.id,
+        timeZone: user.timeZone,
       });
     }
   }

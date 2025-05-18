@@ -93,14 +93,24 @@ export class EmailService {
 
   @OnEvent('user.reminders', { async: true })
   async sendReminderEmail(data: EventPayloads['user.reminders']) {
-    const { name, email, userId, caloriesGoal, waterGoal } = data;
+    const { name, email, userId, caloriesGoal, waterGoal, timeZone } = data;
 
     const waterConsumedData =
       await this.waterTrackerService.getDailyWaterTracker(userId);
 
+    let userFecha: string;
+
+    if (!timeZone) {
+      userFecha = DateTime.now()
+        .setZone('America/Argentina/Buenos_Aires')
+        .toISODate();
+    } else {
+      userFecha = DateTime.now().setZone(timeZone).toISODate();
+    }
+
     const caloriesConsumedData = await this.foodTrackerServide.getDailyCalories(
       userId,
-      DateTime.now().setZone('America/Argentina/Buenos_Aires').toISODate(),
+      userFecha,
     );
     let waterConsumed: number;
     if (!waterConsumedData.waterTracker) {
