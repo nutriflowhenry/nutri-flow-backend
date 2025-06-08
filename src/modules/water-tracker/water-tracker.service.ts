@@ -31,19 +31,22 @@ export class WaterTrackerService {
         today,
       );
     if (!waterTracker) {
-      const initialAmount: number =
-        dataUpdate.action === WaterTrackerAction.INCREMENT ? 50 : 0;
-      waterTracker = await this.waterTrackerRepository.createWaterTracker({
-        amount: initialAmount,
-        date: today,
-        userProfile,
-      });
+      const initialAmount: number = 
+      dataUpdate.action === WaterTrackerAction.INCREMENT 
+        ? dataUpdate.amount 
+        : 0;
+    
+    waterTracker = await this.waterTrackerRepository.createWaterTracker({
+      amount: initialAmount,
+      date: today,
+      userProfile,
+    });
     } else {
-      waterTracker = await this.waterTrackerRepository.updateWaterTracker(
-        dataUpdate,
-        waterTracker,
-      );
-    }
+    waterTracker = await this.waterTrackerRepository.updateWaterTracker(
+      dataUpdate,
+      waterTracker,
+    );
+  }
     const updatedWaterTracker: number = waterTracker.amount;
     return {
       message: 'Registro de consumo de agua actualizado con exito',
@@ -51,23 +54,22 @@ export class WaterTrackerService {
     };
   }
 
-  async getDailyWaterTracker(userId: string, date?: string) {
-    const userProfile: UserProfile = await this.getUserProfile(userId);
-    const dateVerified = date ? date : new Date().toISOString();
-    const waterTracker: WaterTracker | null =
-      await this.waterTrackerRepository.getWaterTrackerByDate(
-        userProfile,
-        dateVerified,
-      );
-    if (!waterTracker) {
-      return {
-        message: 'No hay registros para la fecha solicitada',
-      };
-    }
-    return {
-      waterTracker,
-    };
-  }
+  async getDailyWaterTracker(
+  userId: string,
+  date: string, // YYYY-MM-DD
+  timeZone: string = 'America/Mexico_City'
+) {
+  const userProfile = await this.getUserProfile(userId);
+  
+  // Limpia la fecha por si acaso
+  const cleanDate = date.split('T')[0];
+  
+  return this.waterTrackerRepository.getWaterTrackerByDate(
+    userProfile,
+    cleanDate,
+    timeZone
+  );
+}
 
   async getAll(userId: string, getData: GetAllWaterTrackerDto) {
     const skip: number = (getData.page - 1) * getData.limit;

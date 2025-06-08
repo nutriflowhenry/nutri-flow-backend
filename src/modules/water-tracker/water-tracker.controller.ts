@@ -24,7 +24,7 @@ import { GetDailyWaterTrackerDto } from './dto/get-daily-water-tracker.dto';
 
 @Controller('water-tracker')
 export class WaterTrackerController {
-  constructor(private readonly waterTrackerService: WaterTrackerService) {}
+  constructor(private readonly waterTrackerService: WaterTrackerService) { }
 
   @ApiBearerAuth()
   @ApiOperation({
@@ -117,13 +117,36 @@ export class WaterTrackerController {
   })
   @UseGuards(AuthGuard)
   @Get('daily')
-  async getDailyWaterTracker(
-    @Query() queryData: GetDailyWaterTrackerDto,
-    @Req() req: { user: { sub: string } },
-  ) {
-    const day: string = queryData.date;
-    return this.waterTrackerService.getDailyWaterTracker(req.user.sub, day);
+async getDailyWaterTracker(
+  @Query() queryData: GetDailyWaterTrackerDto,
+  @Req() req: { user: { sub: string } },
+) {
+  // Asegúrate de que la fecha esté en formato YYYY-MM-DD
+  const today = new Date();
+  const day = queryData.date || 
+  `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+  
+  const result = await this.waterTrackerService.getDailyWaterTracker(
+    req.user.sub,
+    day,
+    queryData.timeZone || 'America/Mexico_City'
+  );
+
+  if (!result) {
+    return {
+      message: 'No hay registros para la fecha solicitada',
+      data: null
+    };
   }
+
+  return {
+    waterTracker: {
+      id: result.id,
+      amount: result.amount,
+      date: result.date
+    }
+  };
+}
 
   @UseGuards(AuthGuard)
   @Get('all')

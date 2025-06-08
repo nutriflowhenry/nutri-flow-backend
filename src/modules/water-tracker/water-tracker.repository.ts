@@ -18,7 +18,7 @@ export class WaterTrackerRepository {
   constructor(
     @InjectRepository(WaterTracker)
     private readonly waterTrackerRepository: Repository<WaterTracker>,
-  ) {}
+  ) { }
 
   async createWaterTracker(
     createWaterTrackerDto: CreateWaterTrackerDto,
@@ -34,60 +34,42 @@ export class WaterTrackerRepository {
     dailyWaterTracker: WaterTracker,
   ): Promise<WaterTracker> {
     let updatedAmount: number = dailyWaterTracker.amount;
+
     if (dataUpdate.action === WaterTrackerAction.INCREMENT) {
-      updatedAmount += 50;
+      updatedAmount += dataUpdate.amount;
     } else if (dataUpdate.action === WaterTrackerAction.DECREMENT) {
-      updatedAmount = Math.max(0, updatedAmount - 50);
+      updatedAmount = Math.max(0, updatedAmount - dataUpdate.amount);
     }
+
     this.waterTrackerRepository.merge(dailyWaterTracker, {
       amount: updatedAmount,
     });
+
     await this.waterTrackerRepository.save(dailyWaterTracker);
     return dailyWaterTracker;
   }
 
   async getWaterTrackerByDate(
     userProfile: UserProfile,
-    date?: string,
-    timeZone: string = 'America/Mexico_City',
+    date: string, // YYYY-MM-DD
+    timeZone: string = 'America/Mexico_City'
   ): Promise<WaterTracker | null> {
-    // 1. Convertir la fecha a la zona horaria del usuario
-    const userDate = date
-      ? DateTime.fromJSDate(new Date(date)).setZone(timeZone)
-      : DateTime.now().setZone(timeZone);
+    // Convertir la fecha de entrada a inicio y fin de día en la zona horaria del usuario
+    const userDate = DateTime.fromFormat(date, 'yyyy-MM-dd').setZone(timeZone);
 
-    // 2. Calcular inicio y fin del día EN LA ZONA HORARIA DEL USUARIO
-    const startOfDay = userDate.startOf('day');
-    const endOfDay = userDate.endOf('day');
+    if (!userDate.isValid) {
+      throw new Error(`Fecha inválida: ${userDate.invalidExplanation}`);
+    }
 
-    // 3. Convertir a UTC para la consulta en BD
-    const startUTC = startOfDay.toUTC().toJSDate();
-    const endUTC = endOfDay.toUTC().toJSDate();
-
-    // const queryDate = new Date(date) || new Date();
-    // const startOfDay = new Date(
-    //   Date.UTC(
-    //     queryDate.getUTCFullYear(),
-    //     queryDate.getUTCMonth(),
-    //     queryDate.getUTCDate(),
-    //   ),
-    // );
-
-    // const endOfDay = new Date(
-    //   Date.UTC(
-    //     queryDate.getUTCFullYear(),
-    //     queryDate.getUTCMonth(),
-    //     queryDate.getUTCDate() + 1,
-    //   ),
-    // );
-
-    let waterTracker = await this.waterTrackerRepository.findOne({
+    // Convertir a UTC para la consulta
+    const startUTC = userDate.startOf('day').toUTC().toJSDate();
+    const endUTC = userDate.endOf('day').toUTC().toJSDate();
+    return this.waterTrackerRepository.findOne({
       where: {
         date: Between(startUTC, endUTC),
-        userProfile,
-      },
+        userProfile
+      }
     });
-    return waterTracker;
   }
 
   async getAll(
