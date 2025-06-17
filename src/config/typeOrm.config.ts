@@ -17,6 +17,7 @@ const typeOrmConfig = {
     synchronize: true,
     logging: false,
     // migrations: ['dist/migrations/*{.js,.ts}'],
+
 };
 
 export default registerAs('typeorm', () => typeOrmConfig);

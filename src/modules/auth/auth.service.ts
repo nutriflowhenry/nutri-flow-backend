@@ -14,6 +14,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { UsersService } from '../users/users.service';
 import { CloudFrontService } from '../aws/cloud-front.service';
 import { TypedEventEmitter } from '../emitters/typed-event-emitter.class';
+import { CreateGoogleUserDto } from '../users/dto/create-googleUser.dto';
 
 @Injectable()
 export class AuthService {
@@ -86,8 +87,8 @@ export class AuthService {
         };
     }
 
-    async authenticateWithGoogle(token: string) {
-        const googleUser = await this.verifyGoogleToken(token);
+    async authenticateWithGoogle(userData: CreateGoogleUserDto) {
+        const googleUser = await this.verifyGoogleToken(userData.token);
         if (!googleUser)
             throw new UnauthorizedException('Google authentication failed');
 
@@ -97,6 +98,7 @@ export class AuthService {
                 name: googleUser.given_name,
                 email: googleUser.email,
                 auth0Id: googleUser.sub,
+                timezone: userData.timezone
             });
             this.eventEmitter.emitAsync('user.registered', {
                 name: user.name,

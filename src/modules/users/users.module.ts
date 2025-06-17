@@ -35,6 +35,7 @@ export class UsersModule implements OnModuleInit {
       name: 'Admin',
       email: 'admin@mail.com',
       password: 'Password123!',
+      timezone: 'UTC'
     });
   }
 }

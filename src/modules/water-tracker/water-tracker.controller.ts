@@ -24,7 +24,7 @@ import { GetDailyWaterTrackerDto } from './dto/get-daily-water-tracker.dto';
 
 @Controller('water-tracker')
 export class WaterTrackerController {
-  constructor(private readonly waterTrackerService: WaterTrackerService) {}
+  constructor(private readonly waterTrackerService: WaterTrackerService) { }
 
   @ApiBearerAuth()
   @ApiOperation({
@@ -89,18 +89,18 @@ export class WaterTrackerController {
     type: String,
     name: 'date',
     default: new Date(),
-    description: 'Fecha de la cual se desea obtener el registro',
+    description: 'Fecha de la cual se desea obtener el registro de acuerdo a la zona horaria del usuario',
     example: '2025-11-01',
     required: false,
   })
-  @ApiQuery({
-    type: String,
-    name: 'timeZone',
-    default: 'America/Mexico_City',
-    description: 'Zona horaria del usuario',
-    example: 'America/Mexico_City',
-    required: false,
-  })
+  // @ApiQuery({
+  //   type: String,
+  //   name: 'timeZone',
+  //   default: 'America/Mexico_City',
+  //   description: 'Zona horaria del usuario',
+  //   example: 'America/Mexico_City',
+  //   required: false,
+  // })
   @ApiResponse({
     status: HttpStatus.OK,
     description:
@@ -117,13 +117,36 @@ export class WaterTrackerController {
   })
   @UseGuards(AuthGuard)
   @Get('daily')
-  async getDailyWaterTracker(
-    @Query() queryData: GetDailyWaterTrackerDto,
-    @Req() req: { user: { sub: string } },
-  ) {
-    const day: string = queryData.date;
-    return this.waterTrackerService.getDailyWaterTracker(req.user.sub, day);
+async getDailyWaterTracker(
+  @Query() queryData: GetDailyWaterTrackerDto,
+  @Req() req: { user: { sub: string } },
+) {
+  // Asegúrate de que la fecha esté en formato YYYY-MM-DD
+  const today = new Date();
+  const day = queryData.date || 
+  `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+  
+  const result = await this.waterTrackerService.getDailyWaterTracker(
+    req.user.sub,
+    day,
+    // queryData.timeZone || 'America/Mexico_City'
+  );
+
+  if (!result) {
+    return {
+      message: 'No hay registros para la fecha solicitada',
+      data: null
+    };
   }
+
+  return {
+    waterTracker: {
+      id: result.id,
+      amount: result.amount,
+      date: result.date
+    }
+  };
+}
 
   @UseGuards(AuthGuard)
   @Get('all')

@@ -1,6 +1,8 @@
 import { IsEmail, IsNotEmpty, IsString, IsStrongPassword, MaxLength } from 'class-validator';
 import { Match } from '../../../decorators/match.decorator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsIanaTimezone } from '../../../decorators/is-iana-timezone.validator';
 
 export class CreateLocalUserDto {
     @IsNotEmpty()
@@ -44,4 +46,9 @@ export class CreateLocalUserDto {
         description: 'Debe coincidir con el campo password'
     })
     passwordConfirmation: string;
+
+    @IsString()
+    @Transform(({ value }) => value?.trim())
+    @IsIanaTimezone({ message: 'Debe proporcionar una zona horaria IANA válida, e.g. America/Mexico_City' })
+    timezone: string;
 }

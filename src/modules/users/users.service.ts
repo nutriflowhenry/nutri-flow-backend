@@ -74,7 +74,7 @@ export class UsersService {
         await this.findById(id);
 
         if (updateData?.country && updateData?.city) {
-            updateData.timeZone = this.timeZoneService.getTimeZone(
+            updateData.timezone = this.timeZoneService.getTimeZone(
                 updateData.country,
                 updateData.city,
             );
