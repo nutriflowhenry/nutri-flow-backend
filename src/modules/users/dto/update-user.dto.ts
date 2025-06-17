@@ -2,6 +2,8 @@ import { PartialType } from '@nestjs/mapped-types';
 import { CreateLocalUserDto } from './create-local-user.dto';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsIanaTimezone } from 'src/decorators/is-iana-timezone.validator';
 
 export class UpdateUserDto extends PartialType(CreateLocalUserDto) {
     @IsOptional()
@@ -29,9 +31,10 @@ export class UpdateUserDto extends PartialType(CreateLocalUserDto) {
     @IsString()
     phone?: string;
 
-    @IsOptional()
-    @IsString()
-    timeZone?: string;
+    @IsString() 
+    @Transform(({ value }) => value?.trim())
+    @IsIanaTimezone({ message: 'Debe proporcionar una zona horaria IANA válida, e.g. America/Mexico_City' })
+    timezone?: string;
 
     @IsOptional()
     @IsBoolean()

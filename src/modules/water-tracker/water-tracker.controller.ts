@@ -89,18 +89,18 @@ export class WaterTrackerController {
     type: String,
     name: 'date',
     default: new Date(),
-    description: 'Fecha de la cual se desea obtener el registro',
+    description: 'Fecha de la cual se desea obtener el registro de acuerdo a la zona horaria del usuario',
     example: '2025-11-01',
     required: false,
   })
-  @ApiQuery({
-    type: String,
-    name: 'timeZone',
-    default: 'America/Mexico_City',
-    description: 'Zona horaria del usuario',
-    example: 'America/Mexico_City',
-    required: false,
-  })
+  // @ApiQuery({
+  //   type: String,
+  //   name: 'timeZone',
+  //   default: 'America/Mexico_City',
+  //   description: 'Zona horaria del usuario',
+  //   example: 'America/Mexico_City',
+  //   required: false,
+  // })
   @ApiResponse({
     status: HttpStatus.OK,
     description:
@@ -129,7 +129,7 @@ async getDailyWaterTracker(
   const result = await this.waterTrackerService.getDailyWaterTracker(
     req.user.sub,
     day,
-    queryData.timeZone || 'America/Mexico_City'
+    // queryData.timeZone || 'America/Mexico_City'
   );
 
   if (!result) {

@@ -2,15 +2,15 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsTimeZone, Matches } from 'class-validator';
 
 export class GetDailyWaterTrackerDto {
-  @ApiProperty({
-    description: 'Zona horaria del usuario',
-    example: 'America/Mexico_City',
-    required: false,
-    type: String,
-  })
-  @IsOptional()
-  @IsTimeZone()
-  timeZone?: string;
+  // @ApiProperty({
+  //   description: 'Zona horaria del usuario',
+  //   example: 'America/Mexico_City',
+  //   required: false,
+  //   type: String,
+  // })
+  // @IsOptional()
+  // @IsTimeZone()
+  // timeZone?: string;
 
   @ApiProperty({
     description: 'Fecha en formato YYYY-MM-DD',

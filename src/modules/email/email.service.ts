@@ -12,6 +12,8 @@ import { DeleteTopicCommand } from '@aws-sdk/client-sns';
 import { FoodTrackerService } from '../food-tracker/food-tracker.service';
 import { WaterTrackerService } from '../water-tracker/water-tracker.service';
 import { NestApplication } from '@nestjs/core';
+import { strict } from 'assert';
+import { WaterTracker } from '../water-tracker/entities/water-tracker.entity';
 
 @Injectable()
 export class EmailService {
@@ -95,8 +97,10 @@ export class EmailService {
   async sendReminderEmail(data: EventPayloads['user.reminders']) {
     const { name, email, userId, caloriesGoal, waterGoal, timeZone } = data;
 
-    const waterConsumedData =
-      await this.waterTrackerService.getDailyWaterTracker(userId);
+    const today: string = new Date().toISOString().split('T')[0]; 
+
+    const waterConsumedData: WaterTracker =
+      await this.waterTrackerService.getDailyWaterTracker(userId, today);
 
     let userFecha: string;
 
@@ -113,10 +117,10 @@ export class EmailService {
       userFecha,
     );
     let waterConsumed: number;
-    if (!waterConsumedData.waterTracker) {
+    if (!waterConsumedData) {
       waterConsumed = 0;
     } else {
-      waterConsumed = waterConsumedData.waterTracker.amount;
+      waterConsumed = waterConsumedData.amount;
     }
     const caloriesConsumed: number = caloriesConsumedData.caloriesConsumed;
     try {

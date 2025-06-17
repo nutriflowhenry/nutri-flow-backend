@@ -9,7 +9,6 @@ import { User } from '../users/entities/user.entity';
 import { UserProfile } from '../user-profiles/entities/user-profile.entity';
 import { GetAllWaterTrackerDto } from './dto/get-all-water-tracker.dto';
 import { DateTime } from 'luxon';
-import { getgid } from 'process';
 
 @Injectable()
 export class WaterTrackerService {
@@ -24,11 +23,16 @@ export class WaterTrackerService {
     userId: string,
   ) {
     const today: string = new Date().toISOString();
+    console.log(today)
+    // const cleanToday: string = today.split('T')[0];
     const userProfile: UserProfile = await this.getUserProfile(userId);
+    const user: User = await this.userService.findById(userId);
+    const userTimeZone:string = user.timeZone;
     let waterTracker: WaterTracker | null =
       await this.waterTrackerRepository.getWaterTrackerByDate(
         userProfile,
         today,
+        userTimeZone
       );
     if (!waterTracker) {
       const initialAmount: number = 
@@ -60,6 +64,8 @@ export class WaterTrackerService {
   timeZone: string = 'America/Mexico_City'
 ) {
   const userProfile = await this.getUserProfile(userId);
+  const user: User = await this.userService.findById(userId);
+  const userTimeZone: string = user.timeZone;
   
   // Limpia la fecha por si acaso
   const cleanDate = date.split('T')[0];
@@ -67,7 +73,7 @@ export class WaterTrackerService {
   return this.waterTrackerRepository.getWaterTrackerByDate(
     userProfile,
     cleanDate,
-    timeZone
+    userTimeZone
   );
 }
 

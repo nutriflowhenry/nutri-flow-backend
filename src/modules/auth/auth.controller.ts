@@ -4,6 +4,7 @@ import { CreateLocalUserDto } from '../users/dto/create-local-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { PublicUserDto } from '../users/dto/public-user.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateGoogleUserDto } from '../users/dto/create-googleUser.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -24,7 +25,7 @@ export class AuthController {
   }
 
   @Post('google')
-  googleAuth(@Body('token') token: string) {
-    return this.authService.authenticateWithGoogle(token);
+  googleAuth(@Body() userData: CreateGoogleUserDto) {
+    return this.authService.authenticateWithGoogle(userData);
   }
 }

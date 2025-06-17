@@ -42,7 +42,8 @@ export class User {
   @Column({ type: 'varchar', length: 50, nullable: true })
   city: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  // Zona horaria del usuario en formato IANA
+  @Column({ type: 'varchar', length: 50, nullable: true, comment: 'Identificador de zona horaria en formato IANA para el usuario (por ejemplo: America/Mexico_City)', default: "America/Argentina/Buenos_Aires" })
   timeZone: string;
 
   @Column({ type: 'varchar', length: 15, nullable: true })

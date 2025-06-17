@@ -6,7 +6,7 @@ import { CreateWaterTrackerDto } from './dto/create-water-tracker.dto';
 import { UpdateWaterTrackerDto } from './dto/update-water-tracker.dto';
 import { WaterTrackerAction } from './enums/WaterTrackerAction.enum';
 import { UserProfile } from '../user-profiles/entities/user-profile.entity';
-import { DateTime } from 'luxon';
+import { DateTime, Zone } from 'luxon';
 import { GetAllWaterTrackerDto } from './dto/get-all-water-tracker.dto';
 
 @Injectable()
@@ -55,7 +55,7 @@ export class WaterTrackerRepository {
     timeZone: string = 'America/Mexico_City'
   ): Promise<WaterTracker | null> {
     // Convertir la fecha de entrada a inicio y fin de día en la zona horaria del usuario
-    const userDate = DateTime.fromFormat(date, 'yyyy-MM-dd').setZone(timeZone);
+    const userDate = DateTime.fromISO(date, {zone: timeZone})
 
     if (!userDate.isValid) {
       throw new Error(`Fecha inválida: ${userDate.invalidExplanation}`);
